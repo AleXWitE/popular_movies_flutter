@@ -3,6 +3,18 @@ import 'package:flutter/material.dart';
 
 // TODO для полного описания мне нужно получать айди фильма и в адрес для рест его подставлять сюда "https://api.themoviedb.org/3/movie/$id?api_key="
 // TODO для картинок и постеров фильма мне нужно получать айди фильма и в адрес для рест его подставлять сюда "https://api.themoviedb.org/3/movie/$id/images?api_key="
+
+// >9 5*
+// >8.5 4.5*
+// >7.5 4*
+// >6.5 3.5*
+// >5.5 3*
+// >5 2.5*
+// >4.5 2*
+// >3.5 1.5*
+// >2.5 1*
+// >1.5 0.5*
+// >0 0*
 class TabDescription extends StatelessWidget {
   int id;
 

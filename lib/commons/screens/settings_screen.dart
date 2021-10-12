@@ -53,7 +53,7 @@ class _SettingScreenState extends State<SettingScreen> {
             _savePrefs();
             Navigator.pop(context);
           },
-          child: Icon(Icons.arrow_back),
+          child: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor, size: 25.0,),
         ),
       ),
       body: Column(

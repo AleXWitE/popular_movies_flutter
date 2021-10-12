@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.white,
         accentColor: Colors.black,
         cardColor: Colors.blueGrey[800],
-        backgroundColor: Colors.grey[600],
+        backgroundColor: Colors.blueGrey[700],
       ),
       initialRoute: '/home',
       routes: {

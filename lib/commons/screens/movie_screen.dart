@@ -50,26 +50,31 @@ class _MovieScreenState extends State<MovieScreen>
         leading: GestureDetector(onTap: () => Navigator.pop(context),child: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor, size: 25.0,)),
       ),
       body: Column(children: [
-        Expanded(
-          flex: 1,
-          child: TabBar(
-            tabs: _tabItems,
-            controller: tabController,
-            labelColor: Theme.of(context).backgroundColor,
-            unselectedLabelColor: Colors.grey[300],
+        Container(
+          height: 50.0,
+          child: Container(
+            color: Theme.of(context).backgroundColor,
+            child: TabBar(
+              tabs: _tabItems,
+              controller: tabController,
+              // indicatorColor: Theme.of(context).cardColor,
+              labelStyle: TextStyle(fontSize: 12.0),
+              labelColor: Theme.of(context).primaryColor,
+              unselectedLabelColor: Colors.grey[400],
+            ),
           ),
         ),
         Expanded(
-          flex: 9,
           child: TabBarView(
-            children: [
-              TabDescription(id: id),
-              TabTrailers(id: id),
-              TabReview(id: id),
-            ],
-            controller: tabController,
-          ),
-        )
+              children: [
+                TabDescription(id: id),
+                TabTrailers(id: id),
+                TabReview(id: id),
+              ],
+              controller: tabController,
+            ),
+        ),
+        
       ]),
     );
   }

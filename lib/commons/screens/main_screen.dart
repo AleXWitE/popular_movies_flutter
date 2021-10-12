@@ -23,12 +23,8 @@ class _MainScreenState extends State<MainScreen> {
     //функция обновления списка
     await Future.delayed(Duration(milliseconds: 1000));
     setState(() {
-      // _coursesList.clear();
     });
     setState(() {
-      // getAllEventsState = getAllCourses(userDivision).asStream();
-      // _hasData = true;
-      // ifNoData(_hasData);
     });
     return null;
   }
@@ -65,13 +61,13 @@ class _MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title, style: TextStyle(color: Theme.of(context).primaryColor),),
         backgroundColor: Theme
             .of(context)
             .cardColor,
         actions: [
           PopupMenuButton(
-            color: Colors.white,
+            color: Theme.of(context).primaryColor,
             itemBuilder: (context) =>
             [
               PopupMenuItem(
@@ -98,13 +94,16 @@ class _MainScreenState extends State<MainScreen> {
             child: Icon(
               Icons.sort,
               size: 30.0,
+              color: Theme.of(context).primaryColor,
             ),
           ),
+          SizedBox(width: 15.0,),
           GestureDetector(
             onTap: () => Navigator.pushNamed(context, '/settings'),
             child: Icon(
               Icons.settings,
               size: 30.0,
+              color: Theme.of(context).primaryColor,
             ),
           ),
         ],
