@@ -39,15 +39,24 @@ class _YouTubePlayState extends State<YouTubePlay> {
         DeviceOrientation.portraitUp,
       ]);
     };
-    // print("key id ${widget.yt?[widget.index].ytKey}");
   }
 
   @override
   Widget build(BuildContext context) {
+
     const player = YoutubePlayerIFrame(); //определяем под переменную сам iframe
-    return YoutubePlayerControllerProvider(
-      controller: _controller,
-      child: player,
+    return Column(
+        children: [
+          widget.yt[0] != widget.yt[widget.index] ? Container() : SizedBox(height: 10.0,),
+          Container(
+            width: MediaQuery.of(context).size.width - 50.0,
+            child: YoutubePlayerControllerProvider(
+              controller: _controller,
+              child: player,
+            ),
+          ),
+          widget.yt[widget.index] == widget.yt.length - 1 ? Container() : SizedBox(height: 10.0,)
+        ]
     );
   }
 

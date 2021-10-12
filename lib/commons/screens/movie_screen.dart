@@ -45,7 +45,9 @@ class _MovieScreenState extends State<MovieScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('film'),
+        title: Text('film', style: TextStyle(color: Theme.of(context).primaryColor),),
+        backgroundColor: Theme.of(context).cardColor,
+        leading: GestureDetector(onTap: () => Navigator.pop(context),child: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor, size: 25.0,)),
       ),
       body: Column(children: [
         Expanded(

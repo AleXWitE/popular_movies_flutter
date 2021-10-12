@@ -21,7 +21,7 @@ List<MovieItem> movieItems = [
   MovieItem(id: 4, movId: 580489, name: "Venom", imgUrl: "https://i.pinimg.com/736x/36/4f/c1/364fc1697476b80248bb049155732aa9.jpg"),
 ];
 
-class YoutubeVideos {
+/*class YoutubeVideos {
   final int ytId;
   final List<YoutubeVideosKeys> ytResults;
 
@@ -36,7 +36,7 @@ class YoutubeVideos {
       ytResults: listVideos,
     );
   }
-}
+}*/
 
 class YoutubeVideosKeys {
   String ytKey;

@@ -6,7 +6,7 @@ import 'package:popular_films/commons/data_models/data_models.dart';
 class TabTrailers extends StatefulWidget {
   int id;
 
-  TabTrailers({ this.id});
+  TabTrailers({Key key, this.id}) : super(key: key);
 
   @override
   State<TabTrailers> createState() => _TabTrailersState();
@@ -17,39 +17,37 @@ class _TabTrailersState extends State<TabTrailers> {
 
   void initState(){
     super.initState();
-    _getData(widget.id);
+    getYoutube = getAllYoutube(widget.id);
   }
-
-  _getData(int _id) {
-    getYoutube = getAllYoutube(_id);
-    return getYoutube;
-  }
+  //
+  // _getData(int _id) {
+  //   getYoutube = getAllYoutube(_id);
+  //   return getYoutube;
+  // }
 
   @override
   Widget build(BuildContext context) {
+    getYoutube = getAllYoutube(widget.id);
 
-    return  FutureBuilder<List<YoutubeVideosKeys>>(
+    return FutureBuilder<List<YoutubeVideosKeys>>(
       future: getYoutube,
       initialData: [],
-      builder: (_, snapshot) {
-
-        int count = snapshot.requireData.length;
-        // int count = 5;
-        print("snapshot has data ${snapshot.hasData}");
-        // return ListView.builder(
-        //   shrinkWrap: true,
-        //   itemBuilder: (context, index) => YouTubePlay(yt: snapshot.data, index: index,),
-        //   itemCount: count,
-        // );
-        if (snapshot.hasData) {
-          return ListView.builder(
-              itemCount: count,
-              itemBuilder: (context, i) => YouTubePlay(yt: snapshot.requireData, index: i)
-          );
+      builder: (context, snapshot) {
+        print('*-> ${snapshot.connectionState}');
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Text('*-> ${snapshot.connectionState}');
+        } else {
+          if (snapshot.hasData) {
+            int count = snapshot.data.length;
+            return ListView.builder(
+                itemCount: count,
+                itemBuilder: (context, i) =>
+                    YouTubePlay(yt: snapshot.data, index: i));
+          } else {
+            return Text('*-> Ничего нет');
+          }
         }
-        return const CircularProgressIndicator();
-      },
-
+      }
     );
   }
 }
