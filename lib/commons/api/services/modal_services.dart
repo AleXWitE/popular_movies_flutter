@@ -49,5 +49,5 @@ Future<MovieDetails> getDescription(int id) async {
         "Accept": "application/json",
       }
   );
-  // return
+  return allDetailsFromJson(response.body);
 }
