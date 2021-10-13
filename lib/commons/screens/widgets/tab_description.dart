@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
@@ -35,109 +36,93 @@ class TabDescription extends StatelessWidget {
       'USD',
       2,
       symbol: '\$',
-      invertSeparators: true,
-      pattern: '#,##0.00 S',
+      invertSeparators: false,
+      pattern: 'S#,##0.00',
     );
 
-    // totalBud = Money.fromInt(movBudget, usd);
-    // totalRev = Money.fromInt(movRevenue, usd);
+    totalBud = Money.fromInt(movBudget, usd).toString();
+    totalRev = Money.fromInt(movRevenue, usd).toString();
 
-    _setDateDesc(String _date) async {
-      await Jiffy.locale("ru");
+    _setDateDesc(String _date)  {
+      Jiffy.locale("ru");
 
       var date = Jiffy(movRelease, "yyyy-mm-dd").format("MMMM, yyyy").toString();
       return date;
     }
 
+    _setDateInfo(String _date) {
+      var date = Jiffy(movRelease, "yyyy-mm-dd").format("dd.mm.yyyy");
+      return date;
+    }
+
+    Icon _star = Icon(Icons.star, size: 20.0, color: Colors.yellow[700]);
+    Icon _starHalf = Icon(Icons.star_half, size: 20.0, color: Colors.yellow[700]);
+    Icon _starBorder = Icon(Icons.star_border, size: 20.0, color: Colors.yellow[700]);
+
     if (movVote < 1.5)
       _starRow = Row(
         children: [
-          Icon(
-            Icons.star_border,
-            size: 10.0,
-          ),
-          Icon(Icons.star_border, size: 10.0), Icon(Icons.star_border, size: 10.0),
-          Icon(Icons.star_border, size: 10.0), Icon(Icons.star_border, size: 10.0)
+          _starBorder, _starBorder, _starBorder, _starBorder, _starBorder,
         ],
       );
     else if (movVote > 1.5 && movVote < 2.5)
       _starRow = Row(
         children: [
-          Icon(Icons.star_half, size: 10.0), Icon(Icons.star_border, size: 10.0),
-          Icon(Icons.star_border, size: 10.0), Icon(Icons.star_border, size: 10.0),
-          Icon(Icons.star_border, size: 10.0)
+          _starHalf, _starBorder, _starBorder, _starBorder, _starBorder,
         ],
       );
     else if (movVote > 2.5 && movVote < 3.5)
       _starRow = Row(
         children: [
-          Icon(Icons.star, size: 10.0), Icon(Icons.star_border, size: 10.0),
-          Icon(Icons.star_border, size: 10.0), Icon(Icons.star_border, size: 10.0),
-          Icon(Icons.star_border, size: 10.0)
+          _star, _starBorder, _starBorder, _starBorder, _starBorder,
         ],
       );
     else if (movVote > 3.5 && movVote < 4.5)
       _starRow = Row(
         children: [
-          Icon(Icons.star, size: 10.0), Icon(Icons.star_half, size: 10.0),
-          Icon(Icons.star_border, size: 10.0), Icon(Icons.star_border, size: 10.0),
-          Icon(Icons.star_border, size: 10.0)
+          _star, _starHalf, _starBorder, _starBorder, _starBorder,
         ],
       );
     else if (movVote > 4.5 && movVote < 5)
       _starRow = Row(
         children: [
-          Icon(Icons.star, size: 10.0), Icon(Icons.star, size: 10.0),
-          Icon(Icons.star_border, size: 10.0), Icon(Icons.star_border, size: 10.0),
-          Icon(Icons.star_border, size: 10.0)
+          _star, _star, _starBorder, _starBorder, _starBorder,
         ],
       );
     else if (movVote > 5 && movVote < 5.5)
       _starRow = Row(
         children: [
-          Icon(Icons.star, size: 10.0), Icon(Icons.star, size: 10.0),
-          Icon(Icons.star_half, size: 10.0), Icon(Icons.star_border, size: 10.0),
-          Icon(Icons.star_border, size: 10.0)
+          _star, _star, _starHalf, _starBorder, _starBorder,
         ],
       );
     else if (movVote > 5.5 && movVote < 6.5)
       _starRow = Row(
         children: [
-          Icon(Icons.star, size: 10.0), Icon(Icons.star, size: 10.0),
-          Icon(Icons.star, size: 10.0), Icon(Icons.star_border, size: 10.0),
-          Icon(Icons.star_border, size: 10.0)
+          _star, _star, _star, _starBorder, _starBorder,
         ],
       );
     else if (movVote > 6.5 && movVote < 7.5)
       _starRow = Row(
         children: [
-          Icon(Icons.star, size: 10.0), Icon(Icons.star, size: 10.0),
-          Icon(Icons.star, size: 10.0), Icon(Icons.star_half, size: 10.0),
-          Icon(Icons.star_border, size: 10.0)
+          _star, _star, _star, _starHalf, _starBorder,
         ],
       );
     else if (movVote > 7.5 && movVote < 8.5)
       _starRow = Row(
         children: [
-          Icon(Icons.star, size: 10.0), Icon(Icons.star, size: 10.0),
-          Icon(Icons.star, size: 10.0), Icon(Icons.star, size: 10.0),
-          Icon(Icons.star_border, size: 10.0)
+          _star, _star, _star, _star, _starBorder,
         ],
       );
     else if (movVote > 8.5 && movVote < 9)
       _starRow = Row(
         children: [
-          Icon(Icons.star, size: 10.0), Icon(Icons.star, size: 10.0),
-          Icon(Icons.star, size: 10.0), Icon(Icons.star, size: 10.0),
-          Icon(Icons.star_half, size: 10.0)
+          _star, _star, _star, _star, _starHalf,
         ],
       );
     else if (movVote > 9)
       _starRow = Row(
         children: [
-          Icon(Icons.star, size: 10.0), Icon(Icons.star, size: 10.0),
-          Icon(Icons.star, size: 10.0), Icon(Icons.star, size: 10.0),
-          Icon(Icons.star, size: 10.0)
+          _star, _star, _star, _star, _star,
         ],
       );
 
@@ -157,15 +142,20 @@ class TabDescription extends StatelessWidget {
 
     _row() {
       return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Container(
             child: Row(
               children: [
-                Image.asset(
-                  "lib/img/tmdb.png",
-                  width: 35.0,
+                Container(
+                  padding: EdgeInsets.fromLTRB(0.0, 10.0, 10.0, 10.0),
+                  child: Image.asset(
+                    "lib/img/tmdb.png",
+                    width: 35.0,
+                  ),
                 ),
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       "$movVote/10",
@@ -183,13 +173,16 @@ class TabDescription extends StatelessWidget {
           Container(
             child: Row(
               children: [
-                Icon(
-                  Icons.language,
-                  color: Colors.blue[700],
-                  size: 35.0,
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Icon(
+                    Icons.language,
+                    color: Colors.blue[700],
+                    size: 35.0,
+                  ),
                 ),
                 Text(
-                  "Язык\n$movLang",
+                  "Язык\n${movLang.substring(1, movLang.length - 1)}",
                   style: TextStyle(
                     color: Colors.grey[700],
                     fontWeight: FontWeight.bold,
@@ -201,10 +194,13 @@ class TabDescription extends StatelessWidget {
           ),
           Container(
               child: Row(children: [
-            Icon(
-              Icons.language,
-              color: Colors.blue[700],
-              size: 35.0,
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.0),
+              child: Icon(
+                Icons.av_timer,
+                color: Colors.deepOrange[500],
+                size: 35.0,
+              ),
             ),
             Text(
               "Время\n${_formatTime(movRuntime)}",
@@ -269,11 +265,11 @@ class TabDescription extends StatelessWidget {
                 children: [
                   _spanText(movTitle),
                   _spanHeader("Дата релиза: "),
-                  _spanText(movRelease),
+                  _spanText(_setDateInfo(movRelease)),
                   _spanHeader("Бюджет: "),
-                  _spanText(details.movBudget.toString()),
+                  _spanText(totalBud),
                   _spanHeader("Доход: "),
-                  _spanText(totalRev.toString()),
+                  _spanText(totalRev),
                   _spanHeader("Страница: "),
                   TextSpan(
                     text: movLink,

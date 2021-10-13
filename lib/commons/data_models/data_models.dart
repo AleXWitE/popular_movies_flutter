@@ -21,23 +21,6 @@ List<MovieItem> movieItems = [
   MovieItem(id: 4, movId: 580489, name: "Venom", imgUrl: "https://i.pinimg.com/736x/36/4f/c1/364fc1697476b80248bb049155732aa9.jpg"),
 ];
 
-/*class YoutubeVideos {
-  final int ytId;
-  final List<YoutubeVideosKeys> ytResults;
-
-  YoutubeVideos({this.ytId, this.ytResults});
-
-  factory YoutubeVideos.fromJson(Map<String, dynamic> json){
-    var list = json['results'] as List;
-
-    List<YoutubeVideosKeys> listVideos = list.map((i) => YoutubeVideosKeys.fromJson(i)).toList();
-    return YoutubeVideos(
-      ytId: json['id'],
-      ytResults: listVideos,
-    );
-  }
-}*/
-
 class YoutubeVideosKeys {
   String ytKey;
   String ytName;
