@@ -5,7 +5,6 @@ import 'package:jiffy/jiffy.dart';
 import 'package:money2/money2.dart';
 import 'package:popular_films/commons/data_models/movie_details.dart';
 
-// TODO для картинок и постеров фильма мне нужно получать айди фильма и в адрес для рест его подставлять сюда "https://api.themoviedb.org/3/movie/$id/images?api_key="
 
 class TabDescription extends StatelessWidget {
   int id;
@@ -37,7 +36,7 @@ class TabDescription extends StatelessWidget {
     var movBudget = details.movBudget != 0.0 ? Money.fromInt(details.movBudget, usd).toString() : emptyInfo;
     var movRevenue = details.movRevenue != 0.0 ? Money.fromInt(details.movRevenue, usd).toString() : emptyInfo;
     String movLink = details.movHomepage != null ? details.movHomepage : emptyInfo;
-    var movVote = details.movVote != 0.0 ? details.movVote : 0.0;
+    var movVote = details.movVote != 0.0 ? details.movVote : 0.1;
     String movLang = details.movLanguage != '' ? details.movLanguage : shortEmptyInfo;
     var movRuntime = details.movRuntime != 0 ? details.movRuntime : shortEmptyInfo;
 

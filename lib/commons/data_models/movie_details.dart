@@ -38,7 +38,7 @@ class MovieDetails {
       movPosterPath: json['poster_path'],
       movGenres: listGenres,
       movVote: json['vote_average'],
-      movLanguage: listLang.first,
+      movLanguage: listLang.length != 1 ? listLang.singleWhere((e) => e == "English") : listLang.first,
       movRuntime: json['runtime'],
       movOverview: json['overview'],
       movRelease: json['release_date'],

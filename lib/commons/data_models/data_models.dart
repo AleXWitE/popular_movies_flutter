@@ -27,13 +27,6 @@ class MovieItem {
   }
 }
 
-// List<MovieItem> movieItems = [
-//   MovieItem(id: 1, movId: 580489, name: "Venom", imgUrl: "https://i.pinimg.com/736x/36/4f/c1/364fc1697476b80248bb049155732aa9.jpg"),
-//   MovieItem(id: 2, movId: 580489, name: "Venom", imgUrl: "https://i.pinimg.com/736x/36/4f/c1/364fc1697476b80248bb049155732aa9.jpg"),
-//   MovieItem(id: 3, movId: 580489, name: "Venom", imgUrl: "https://i.pinimg.com/736x/36/4f/c1/364fc1697476b80248bb049155732aa9.jpg"),
-//   MovieItem(id: 4, movId: 580489, name: "Venom", imgUrl: "https://i.pinimg.com/736x/36/4f/c1/364fc1697476b80248bb049155732aa9.jpg"),
-// ];
-
 class YoutubeVideosKeys {
   String ytKey;
   String ytName;
@@ -65,7 +58,25 @@ class MovieImages{
 
 class PopularMovieImgs{
   int id;
+  String title;
   CachedNetworkImage cachedImg;
 
-  PopularMovieImgs({this.id, this.cachedImg});
+  PopularMovieImgs({this.id, this.title, this.cachedImg});
+}
+
+class MovieReviews{
+  int id;
+  String author;
+  String content;
+
+  MovieReviews({this.id, this.author, this.content});
+
+  factory MovieReviews.fromJson(Map<String, dynamic> json){
+    int i = 0;
+    return MovieReviews(
+      id: i++,
+      author: json['author'],
+      content: json['content'],
+    );
+  }
 }

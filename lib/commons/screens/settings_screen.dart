@@ -65,47 +65,49 @@ class _SettingScreenState extends State<SettingScreen> {
                 "Настройки данных",
                 style: TextStyle(color: Colors.teal[400], fontSize: 16.0),
               )),
-          ListTile(
-            leading: Icon(Icons.sort),
-            title: Text("Режим сортировки"),
-            subtitle: Text(popRadio == "rate" ? "По рейтингу" : "По популярности"),
-            onTap: () =>
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) =>
-                      AlertDialog(
-                        title: Text("Режим сортировки"),
-                        content: Container(
-                          height: 112.0,
-                          child: Column(
-                            children: [
-                              RadioListTile(
-                                value: "popular",
-                                groupValue: popRadio,
-                                onChanged: (newValue) {
-                                  setState(() => popRadio = newValue.toString());
-                                  Navigator.pop(context);
-                                },
-                                title: Text("По популярности"),),
-                              RadioListTile(
-                                value: "rate",
-                                groupValue: popRadio,
-                                onChanged: (newValue) {
-                                  setState(() => popRadio = newValue.toString());
-                                  Navigator.pop(context);
-                                },
-                                title: Text("По рейтингу"),),
-                            ],
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                              onPressed: () => Navigator.pop(context, "Отмена"),
-                              child: Text("Отмена"))
-                        ],
-                      ),
-                ),
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.sort),
+          //   title: Text("Режим сортировки"),
+          //   subtitle: Text(popRadio == "rate" ? "По рейтингу" : "По популярности"),
+          //   onTap: () =>
+          //       showDialog(
+          //         context: context,
+          //         builder: (BuildContext context) =>
+          //             AlertDialog(
+          //               title: Text("Режим сортировки"),
+          //               content: Container(
+          //                 height: 112.0,
+          //                 child: Column(
+          //                   children: [
+          //                     RadioListTile(
+          //                       value: "popular",
+          //                       groupValue: popRadio,
+          //                       selected: popRadio == 'popular' ? true : false,
+          //                       onChanged: (newValue) {
+          //                         setState(() => popRadio = newValue);
+          //                         Navigator.pop(context, "popular");
+          //                       },
+          //                       title: Text("По популярности"),),
+          //                     RadioListTile(
+          //                       value: "rate",
+          //                       groupValue: popRadio,
+          //                       selected: popRadio != 'popular' ? true : false,
+          //                       onChanged: (newValue) {
+          //                         setState(() => popRadio = newValue);
+          //                         Navigator.pop(context, "rate");
+          //                       },
+          //                       title: Text("По рейтингу"),),
+          //                   ],
+          //                 ),
+          //               ),
+          //               actions: [
+          //                 TextButton(
+          //                     onPressed: () => Navigator.pop(context, "Отмена"),
+          //                     child: Text("Отмена"))
+          //               ],
+          //             ),
+          //       ),
+          // ),
           CheckboxListTile(
             title: const Text("Любимые фильмы"),
             subtitle: favCheckBox == false

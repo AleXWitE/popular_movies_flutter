@@ -21,7 +21,6 @@ class MovieScreen extends StatefulWidget {
 
 class _MovieScreenState extends State<MovieScreen>
     with TickerProviderStateMixin {
-  // int id = widget.movie;
   List<CachedNetworkImage> _cachedImgs = [];
 
   final _tabItems = [
@@ -36,13 +35,12 @@ class _MovieScreenState extends State<MovieScreen>
     ),
   ];
 
-  String movRelease = "2021-09-21";
-  String _imgUrl = 'https://image.tmdb.org/t/p/original';
+  String _imgUrl = 'https://image.tmdb.org/t/p/w500';
 
   _setDateDesc(String _date) {
     Jiffy.locale("ru");
 
-    var date = Jiffy(movRelease, "yyyy-mm-dd").format("MMMM, yyyy").toString();
+    var date = Jiffy(_date, "yyyy-mm-dd").format("MMMM, yyyy").toString();
     return date;
   }
 
@@ -71,7 +69,6 @@ class _MovieScreenState extends State<MovieScreen>
   void initState() {
     super.initState();
     _getDetails();
-    // _getImages();
     movImages = getAllImages(widget.movie);
     _addImgs(movImages);
   }
@@ -84,49 +81,24 @@ class _MovieScreenState extends State<MovieScreen>
 
   @override
   Widget build(BuildContext context) {
+    final _movTitle = ModalRoute.of(context).settings.arguments as Map;
+
     PageController _pageController = PageController(initialPage: 0);
     TabController tabController =
         TabController(length: _tabItems.length, vsync: this);
     int _pageId = 0;
     Curve curve = Curves.easeIn;
-    bool _slider = true;
-
-    // _markChildren() {
-    //   for (int _i = 0; _i < _cachedImgs.length; _i++)
-    //     Container(
-    //       height: 10.0,
-    //       width: 10.0,
-    //       decoration: BoxDecoration(
-    //         borderRadius: BorderRadius.circular(5.0),
-    //         color: _i == _pageId ? Colors.teal[400] : Colors.grey[500],
-    //       ),
-    //     );
-    // }
 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text(
-      //     'film',
-      //     style: TextStyle(color: Theme.of(context).primaryColor),
-      //   ),
-      //   backgroundColor: Theme.of(context).cardColor,
-      //   leading: GestureDetector(
-      //       onTap: () => Navigator.pop(context),
-      //       child: Icon(
-      //         Icons.arrow_back,
-      //         color: Theme.of(context).primaryColor,
-      //         size: 25.0,
-      //       )),
-      // ),
 
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             backgroundColor: Theme.of(context).cardColor,
             title: Text(
-              "Film",
+              _movTitle['movieTitle'],
               style: TextStyle(
-                  fontSize: 21.0, color: Theme.of(context).primaryColor),
+                  fontSize: 18.0, color: Theme.of(context).primaryColor),
             ),
             leading: GestureDetector(
                 onTap: () => Navigator.pop(context),
@@ -148,61 +120,6 @@ class _MovieScreenState extends State<MovieScreen>
                   initialData: [],
                   future: movImages,
                   builder: (context, snapshot) {
-                    // Future<Null> _changePage(int _id, List _list) async {
-                    //   while (_slider == true) {
-                    //     await Future.delayed(Duration(seconds: 3));
-                    //     if (_pageId == _list.length - 1)
-                    //         _pageId = 0;
-                    //     else
-                    //       _pageId++;
-                    //     _pageController.animateToPage(_pageId,
-                    //         duration: Duration(milliseconds: 500),
-                    //         curve: curve);
-                    //   }
-                    // }
-
-                    // _changePage(_pageId, snapshot.data);
-
-                    // return Stack(
-                    //   children: [
-                    //     Positioned(
-                    //       child: PageView(
-                    //         onPageChanged: (value) =>
-                    //             _changePage(value, _cachedImgs),
-                    //         controller: _pageController,
-                    //         children: [
-                    //           for (var imgs in _cachedImgs)
-                    //             Image(
-                    //               image:
-                    //                   CachedNetworkImageProvider(imgs.imageUrl),
-                    //             )
-                    //         ],
-                    //       ),
-                    //     ),
-                    //     Positioned(
-                    //       top: 10.0,
-                    //       child: Container(
-                    //         width: MediaQuery.of(context).size.width,
-                    //         child: Row(
-                    //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    //           children: [
-                    //             for (int _i = 0; _i < _cachedImgs.length; _i++)
-                    //               Container(
-                    //                 height: 10.0,
-                    //                 width: 10.0,
-                    //                 decoration: BoxDecoration(
-                    //                   borderRadius: BorderRadius.circular(5.0),
-                    //                   color: _i == _pageId
-                    //                       ? Colors.teal[400]
-                    //                       : Colors.grey[500],
-                    //                 ),
-                    //               )
-                    //           ],
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // );
                     if (snapshot.connectionState != ConnectionState.done) {
                       return Center(
                         child: CircularProgressIndicator(),
@@ -212,18 +129,19 @@ class _MovieScreenState extends State<MovieScreen>
                         return Swiper(
                           itemCount: snapshot.data.length,
                           autoplay: true,
-                          autoplayDelay: 3,
+                          autoplayDelay: 1,
                           loop: true,
-                          // duration: 1,
-                          onIndexChanged: (value) => value,
+                          index: 0,
+                          duration: 100,
+                          onIndexChanged: (value) => print(value),
                           pagination: SwiperPagination(
                             alignment: Alignment.topCenter,
-                            margin: EdgeInsets.all(20.0),
+                            margin: EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 0.0),
                             builder: DotSwiperPaginationBuilder(
                                 color: Colors.grey[500],
                                 activeColor: Colors.teal[400],
                                 size: 5.0,
-                                activeSize: 10.0)
+                                activeSize: 7.0)
                           ),
                           itemWidth: MediaQuery.of(context).size.width,
                           itemBuilder: (context, index) => Image(
@@ -288,3 +206,59 @@ class _MovieScreenState extends State<MovieScreen>
     );
   }
 }
+
+// Future<Null> _changePage(int _id, List _list) async {
+//   while (_slider == true) {
+//     await Future.delayed(Duration(seconds: 3));
+//     if (_pageId == _list.length - 1)
+//         _pageId = 0;
+//     else
+//       _pageId++;
+//     _pageController.animateToPage(_pageId,
+//         duration: Duration(milliseconds: 500),
+//         curve: curve);
+//   }
+// }
+
+// _changePage(_pageId, snapshot.data);
+
+// return Stack(
+//   children: [
+//     Positioned(
+//       child: PageView(
+//         onPageChanged: (value) =>
+//             _changePage(value, _cachedImgs),
+//         controller: _pageController,
+//         children: [
+//           for (var imgs in _cachedImgs)
+//             Image(
+//               image:
+//                   CachedNetworkImageProvider(imgs.imageUrl),
+//             )
+//         ],
+//       ),
+//     ),
+//     Positioned(
+//       top: 10.0,
+//       child: Container(
+//         width: MediaQuery.of(context).size.width,
+//         child: Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//           children: [
+//             for (int _i = 0; _i < _cachedImgs.length; _i++)
+//               Container(
+//                 height: 10.0,
+//                 width: 10.0,
+//                 decoration: BoxDecoration(
+//                   borderRadius: BorderRadius.circular(5.0),
+//                   color: _i == _pageId
+//                       ? Colors.teal[400]
+//                       : Colors.grey[500],
+//                 ),
+//               )
+//           ],
+//         ),
+//       ),
+//     ),
+//   ],
+// );

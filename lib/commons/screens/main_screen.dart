@@ -14,15 +14,15 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   GlobalKey<RefreshIndicatorState> refreshKey;
-  String popRadio = "По популярности";
+  String popRadio = "popular";
   bool favCheckbox;
   bool animCheckbox;
-  String _imgUrl = 'https://image.tmdb.org/t/p/original';
+  String _imgUrl = 'https://image.tmdb.org/t/p/w300';
+  ScrollController _scrollController;
 
-  int initialPage = 1;
-  int nextPage = 2;
+  int page = 1;
 
   Future<List<MovieItem>> movieItems;
   List<PopularMovieImgs> _movPosters = [];
@@ -40,17 +40,24 @@ class _MainScreenState extends State<MainScreen> {
   _getPrefs() async {
     var prefs = await _prefs;
     setState(() {
-      popRadio = (prefs.getString("POPULAR_RADIO") ?? "По популярности");
+      popRadio = (prefs.getString("POPULAR_RADIO") ?? "popular");
       favCheckbox = (prefs.getBool("FAV_CHECKBOX") ?? false);
       animCheckbox = (prefs.getBool("ANIMATION_CHECKBOX") ?? false);
     });
   }
 
-  _getMovies() {
+  _savePrefs() async {
+    var prefs = await _prefs;
+    await prefs.setString("POPULAR_RADIO", popRadio);
+    await prefs.setBool("FAV_CHECKBOX", favCheckbox);
+    await prefs.setBool("ANIMATION_CHECKBOX", animCheckbox);
+  }
+
+  _getMovies(int _page) {
     if (popRadio == "popular")
-      movieItems = getPopular(initialPage);
+      movieItems = getPopular(_page);
     else
-      movieItems = getTopRated(initialPage);
+      movieItems = getTopRated(_page);
     return movieItems;
   }
 
@@ -58,13 +65,15 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _getPrefs();
-    _getMovies();
-    movieItems = getPopular(initialPage);
+    _getMovies(page);
+    _scrollController = ScrollController(initialScrollOffset: 0.0, keepScrollOffset: true,);
+    // movieItems = getPopular(initialPage).asStream();
     _addImgs(movieItems);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   _addImgs(Future<List> _list) async {
-    for (var item in await _list as List<MovieItem>)
+    for (var item in _list as List<MovieItem>)
       _movPosters.add(PopularMovieImgs(
         cachedImg: CachedNetworkImage(
           imageUrl: "$_imgUrl${item.imgUrl}",
@@ -72,13 +81,32 @@ class _MainScreenState extends State<MainScreen> {
           errorWidget: (context, url, error) => Icon(Icons.error),
         ),
         id: item.movId,
+        title: item.name,
       ));
     return _movPosters;
   }
 
   @override
-  Widget build(BuildContext context) {
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      _savePrefs();
+      print('paused');
+    }
+    if (state == AppLifecycleState.resumed) {
+      print('resumed');
+      _getPrefs();
+    }
+  }
 
+  @override
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -88,6 +116,7 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Theme.of(context).cardColor,
         actions: [
           PopupMenuButton(
+            initialValue: popRadio,
             color: Theme.of(context).primaryColor,
             itemBuilder: (context) => [
               PopupMenuItem(
@@ -95,8 +124,12 @@ class _MainScreenState extends State<MainScreen> {
                   value: "popular",
                   groupValue: popRadio,
                   onChanged: (newValue) {
-                    setState(() => popRadio = newValue.toString());
-                    _getMovies();
+                    setState(() {
+                      popRadio = newValue;
+                      movieItems = null;
+                      _movPosters.clear();
+                      _getMovies(page);
+                    });
                     Navigator.pop(context);
                   },
                   title: Text("По популярности"),
@@ -107,8 +140,12 @@ class _MainScreenState extends State<MainScreen> {
                   value: "rate",
                   groupValue: popRadio,
                   onChanged: (newValue) {
-                    setState(() => popRadio = newValue.toString());
-                    _getMovies();
+                    setState(() {
+                      popRadio = newValue;
+                      movieItems = null;
+                      _movPosters.clear();
+                      _getMovies(page);
+                    });
                     Navigator.pop(context);
                   },
                   title: Text("По рейтингу"),
@@ -125,7 +162,13 @@ class _MainScreenState extends State<MainScreen> {
             width: 15.0,
           ),
           GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/settings'),
+            onTap: () => Navigator.pushNamed(context, '/settings')
+                .then((value) => setState(() {
+                      _getPrefs();
+                      movieItems = null;
+                      _movPosters.clear();
+                      _getMovies(page);
+                    })),
             child: Icon(
               Icons.settings,
               size: 30.0,
@@ -134,8 +177,6 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
-      // body: refreshIndicator(),
-      // body: _gridViewMovie(),
       body: FutureBuilder<List<MovieItem>>(
           future: movieItems,
           initialData: [],
@@ -149,21 +190,24 @@ class _MainScreenState extends State<MainScreen> {
                 _movPosters.add(PopularMovieImgs(
                   cachedImg: CachedNetworkImage(
                     imageUrl: "$_imgUrl${item.imgUrl}",
-                    placeholder: (context, url) =>
-                        CircularProgressIndicator(),
-                    errorWidget: (context, url, error) =>
-                        Icon(Icons.error),
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
                   ),
                   id: item.movId,
+                  title: item.name,
                 ));
               return GridView.builder(
+                padding: EdgeInsets.all(5.0),
                 itemCount: snapshot.data.length,
+                controller: _scrollController,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  childAspectRatio: 0.6,
                   crossAxisCount: 2,
                   crossAxisSpacing: 5.0,
                   mainAxisSpacing: 5.0,
                 ),
                 itemBuilder: (context, index) {
+
                   return MovieGridItem(_movPosters[index]);
                 },
               );

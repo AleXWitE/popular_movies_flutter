@@ -29,3 +29,8 @@ List<MovieItem> pagePopularAndRated(String _str) {
   var jsonData = jsonDecode(_str);
   return List<MovieItem>.from(jsonData['results'].map((i) => MovieItem.fromJson(i)).toList());
 }
+
+List<MovieReviews> allReviews(String _str){
+  var jsonData = jsonDecode(_str);
+  return List<MovieReviews>.from(jsonData['results'].map((i) => MovieReviews.fromJson(i)).toList());
+}

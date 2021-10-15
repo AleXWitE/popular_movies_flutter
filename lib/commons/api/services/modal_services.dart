@@ -63,6 +63,13 @@ Future<MovieDetails> getDescription(int id) async {
   return allDetailsFromJson(response.body);
 }
 
-// Future getOneImage(String _str){
-//   var _uri = Uri.parse('$_urlImg$_str');
-// }
+Future<List<MovieReviews>> getReviews(int id) async {
+  var _uri = Uri.parse('$_url/$id/reviews?api_key=$_key');
+  final http.Response response = await http.get(
+    _uri,
+      headers: {
+        "Accept": "application/json",
+      }
+  );
+  return allReviews(response.body);
+}
