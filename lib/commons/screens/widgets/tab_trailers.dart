@@ -35,7 +35,7 @@ class _TabTrailersState extends State<TabTrailers> {
       builder: (context, snapshot) {
         print('*-> ${snapshot.connectionState}');
         if (snapshot.connectionState != ConnectionState.done) {
-          return Text('*-> ${snapshot.connectionState}');
+          return Center(child: CircularProgressIndicator(),);
         } else {
           if (snapshot.hasData) {
             int count = snapshot.data.length;

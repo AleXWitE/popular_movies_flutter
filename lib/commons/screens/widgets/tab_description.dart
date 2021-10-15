@@ -5,7 +5,6 @@ import 'package:jiffy/jiffy.dart';
 import 'package:money2/money2.dart';
 import 'package:popular_films/commons/data_models/movie_details.dart';
 
-// TODO для полного описания мне нужно получать айди фильма и в адрес для рест его подставлять сюда "https://api.themoviedb.org/3/movie/$id?api_key="
 // TODO для картинок и постеров фильма мне нужно получать айди фильма и в адрес для рест его подставлять сюда "https://api.themoviedb.org/3/movie/$id/images?api_key="
 
 class TabDescription extends StatelessWidget {
@@ -14,24 +13,16 @@ class TabDescription extends StatelessWidget {
 
   TabDescription({this.id, this.details});
 
-
   var totalBud;
   var totalRev;
 
   Widget _starRow;
 
+  String emptyInfo = "Нет информации";
+  String shortEmptyInfo = "Нет инф...";
+
   @override
   Widget build(BuildContext context) {
-    String movDesc = details.movOverview;
-    String movTitle = details.movOrigTitle;
-    String movRelease = details.movRelease;
-    int movBudget = details.movBudget;
-    int movRevenue = details.movRevenue;
-    String movLink = details.movHomepage;
-    double movVote = details.movVote;
-    String movLang = details.movLanguage;
-    int movRuntime = details.movRuntime;
-
     final usd = Currency.create(
       'USD',
       2,
@@ -40,24 +31,26 @@ class TabDescription extends StatelessWidget {
       pattern: 'S#,##0.00',
     );
 
-    totalBud = Money.fromInt(movBudget, usd).toString();
-    totalRev = Money.fromInt(movRevenue, usd).toString();
+    String movDesc = details.movOverview != null ? details.movOverview : emptyInfo;
+    String movTitle = details.movOrigTitle != null ? details.movOrigTitle : emptyInfo;
+    String movRelease = details.movRelease != null ? details.movRelease : emptyInfo;
+    var movBudget = details.movBudget != 0.0 ? Money.fromInt(details.movBudget, usd).toString() : emptyInfo;
+    var movRevenue = details.movRevenue != 0.0 ? Money.fromInt(details.movRevenue, usd).toString() : emptyInfo;
+    String movLink = details.movHomepage != null ? details.movHomepage : emptyInfo;
+    var movVote = details.movVote != 0.0 ? details.movVote : 0.0;
+    String movLang = details.movLanguage != '[]' ? details.movLanguage.substring(1, details.movLanguage.length -1) : shortEmptyInfo;
+    var movRuntime = details.movRuntime != 0 ? details.movRuntime : shortEmptyInfo;
 
-    _setDateDesc(String _date)  {
-      Jiffy.locale("ru");
-
-      var date = Jiffy(movRelease, "yyyy-mm-dd").format("MMMM, yyyy").toString();
-      return date;
-    }
+    print(details.movGenres);
 
     _setDateInfo(String _date) {
       var date = Jiffy(movRelease, "yyyy-mm-dd").format("dd.mm.yyyy");
       return date;
     }
 
-    Icon _star = Icon(Icons.star, size: 20.0, color: Colors.yellow[700]);
-    Icon _starHalf = Icon(Icons.star_half, size: 20.0, color: Colors.yellow[700]);
-    Icon _starBorder = Icon(Icons.star_border, size: 20.0, color: Colors.yellow[700]);
+    Icon _star = Icon(Icons.star, size: 15.0, color: Colors.yellow[700]);
+    Icon _starHalf = Icon(Icons.star_half, size: 15.0, color: Colors.yellow[700]);
+    Icon _starBorder = Icon(Icons.star_border, size: 15.0, color: Colors.yellow[700]);
 
     if (movVote < 1.5)
       _starRow = Row(
@@ -134,10 +127,14 @@ class TabDescription extends StatelessWidget {
       return _minute < 10 ? "0" + _minute.toString() : _minute.toString();
     }
 
-    String _formatTime(int _minute) {
-      int hour = _minute ~/ 60;
-      int minute = _minute % 60;
-      return formatTimeH(hour) + "h " + formatTimeM(minute) + "m";
+    String _formatTime(var _minute) {
+      if (_minute is int){
+        int hour = _minute ~/ 60;
+        int minute = _minute % 60;
+        return formatTimeH(hour) + "h " + formatTimeM(minute) + "m";
+      }
+      else
+        return shortEmptyInfo;
     }
 
     _row() {
@@ -162,7 +159,7 @@ class TabDescription extends StatelessWidget {
                       style: TextStyle(
                           color: Colors.grey[700],
                           fontWeight: FontWeight.bold,
-                          fontSize: 16.0),
+                          fontSize: 14.0),
                     ),
                     _starRow,
                   ],
@@ -182,11 +179,11 @@ class TabDescription extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "Язык\n${movLang.substring(1, movLang.length - 1)}",
+                  "Язык\n$movLang",
                   style: TextStyle(
                     color: Colors.grey[700],
                     fontWeight: FontWeight.bold,
-                    fontSize: 16.0,
+                    fontSize: 14.0,
                   ),
                 )
               ],
@@ -207,7 +204,7 @@ class TabDescription extends StatelessWidget {
               style: TextStyle(
                 color: Colors.grey[700],
                 fontWeight: FontWeight.bold,
-                fontSize: 16.0,
+                fontSize: 14.0,
               ),
             )
           ])),
@@ -267,15 +264,15 @@ class TabDescription extends StatelessWidget {
                   _spanHeader("Дата релиза: "),
                   _spanText(_setDateInfo(movRelease)),
                   _spanHeader("Бюджет: "),
-                  _spanText(totalBud),
+                  _spanText(movBudget),
                   _spanHeader("Доход: "),
-                  _spanText(totalRev),
+                  _spanText(movRevenue),
                   _spanHeader("Страница: "),
                   TextSpan(
                     text: movLink,
                     style: TextStyle(
-                      decoration: TextDecoration.underline,
-                      color: Colors.teal[400],
+                      decoration:movLink == emptyInfo ? TextDecoration.none : TextDecoration.underline,
+                      color: movLink == emptyInfo ? Colors.grey[700] : Colors.teal[400],
                       fontWeight: FontWeight.normal,
                     ),
                     recognizer: TapGestureRecognizer()

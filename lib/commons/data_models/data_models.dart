@@ -34,3 +34,18 @@ class YoutubeVideosKeys {
     );
   }
 }
+
+class MovieImages{
+  String imgUrl;
+  int imgId;
+
+  MovieImages({this.imgId, this.imgUrl});
+
+  factory MovieImages.fromJson(Map<String, dynamic> json){
+    int i = 0;
+    return MovieImages(
+      imgUrl: json['file_path'],
+      imgId: i++,
+    );
+  }
+}

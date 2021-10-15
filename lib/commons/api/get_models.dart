@@ -8,12 +8,13 @@ List<YoutubeVideosKeys> allYoutubeFromJson(String _str){
   var jsonData = jsonDecode(_str);
 
   // return List<YoutubeVideosKeys>.from(jsonData.map((i) => YoutubeVideosKeys.fromJson(i)).toList());
-  var result = <YoutubeVideosKeys>[];
+  // var result = <YoutubeVideosKeys>[];
   // TODO переделать на мапу
-  for(var item in jsonData['results']) {
-    result.add(YoutubeVideosKeys.fromJson(item));
-  }
-  return result;
+  // for(var item in jsonData['results']) {
+  //   result.add(YoutubeVideosKeys.fromJson(item));
+  // }
+  // return result;
+  return List<YoutubeVideosKeys>.from(jsonData['results'].map((i) => YoutubeVideosKeys.fromJson(i)).toList());
 }
 
 MovieDetails allDetailsFromJson(String _str){
@@ -23,4 +24,10 @@ MovieDetails allDetailsFromJson(String _str){
   return movieDetails;
 
   // return jsonData.map((i) => MovieDetails.fromJson(i));
+}
+
+List<MovieImages> allMovieImages(String _str){
+  var jsonData = jsonDecode(_str);
+
+  return List<MovieImages>.from(jsonData['backdrops'].map((i) => MovieImages.fromJson(i)).toList());
 }

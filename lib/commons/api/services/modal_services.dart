@@ -30,7 +30,7 @@ Future getPopular(int page) async {
   // return
 }
 
-Future getAllPosters(int id) async {
+Future<List<MovieImages>> getAllImages(int id) async {
   var _uri = Uri.parse('$_url/$id/images?api_key=$_key');
   final http.Response response = await http.get(
       _uri,
@@ -38,7 +38,7 @@ Future getAllPosters(int id) async {
         "Accept": "application/json",
       }
   );
-  // return
+  return allMovieImages(response.body);
 }
 
 Future<MovieDetails> getDescription(int id) async {
@@ -51,3 +51,7 @@ Future<MovieDetails> getDescription(int id) async {
   );
   return allDetailsFromJson(response.body);
 }
+
+// Future getOneImage(String _str){
+//   var _uri = Uri.parse('$_urlImg$_str');
+// }
