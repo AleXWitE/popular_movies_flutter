@@ -6,14 +6,7 @@ import 'package:popular_films/commons/data_models/movie_details.dart';
 
 List<YoutubeVideosKeys> allYoutubeFromJson(String _str){
   var jsonData = jsonDecode(_str);
-
-  // return List<YoutubeVideosKeys>.from(jsonData.map((i) => YoutubeVideosKeys.fromJson(i)).toList());
-  // var result = <YoutubeVideosKeys>[];
-  // TODO переделать на мапу
-  // for(var item in jsonData['results']) {
-  //   result.add(YoutubeVideosKeys.fromJson(item));
-  // }
-  // return result;
+  
   return List<YoutubeVideosKeys>.from(jsonData['results'].map((i) => YoutubeVideosKeys.fromJson(i)).toList());
 }
 
@@ -30,4 +23,9 @@ List<MovieImages> allMovieImages(String _str){
   var jsonData = jsonDecode(_str);
 
   return List<MovieImages>.from(jsonData['backdrops'].map((i) => MovieImages.fromJson(i)).toList());
+}
+
+List<MovieItem> pagePopularAndRated(String _str) {
+  var jsonData = jsonDecode(_str);
+  return List<MovieItem>.from(jsonData['results'].map((i) => MovieItem.fromJson(i)).toList());
 }

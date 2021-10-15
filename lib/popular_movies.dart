@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
           //если первая часть пути такая
           return MaterialPageRoute(
             // то вернуть виджет отрисованного роута
-            builder: (context) => MovieScreen(movie: path[2]),
+            builder: (context) => MovieScreen(movie: int.parse(path[2])),
             //и отрисовать внутри класс по полученному id
             settings: routeSettings,
           );

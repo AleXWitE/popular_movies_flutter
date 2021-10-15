@@ -38,10 +38,10 @@ class TabDescription extends StatelessWidget {
     var movRevenue = details.movRevenue != 0.0 ? Money.fromInt(details.movRevenue, usd).toString() : emptyInfo;
     String movLink = details.movHomepage != null ? details.movHomepage : emptyInfo;
     var movVote = details.movVote != 0.0 ? details.movVote : 0.0;
-    String movLang = details.movLanguage != '[]' ? details.movLanguage.substring(1, details.movLanguage.length -1) : shortEmptyInfo;
+    String movLang = details.movLanguage != '' ? details.movLanguage : shortEmptyInfo;
     var movRuntime = details.movRuntime != 0 ? details.movRuntime : shortEmptyInfo;
 
-    print(details.movGenres);
+    print(details.movLanguage);
 
     _setDateInfo(String _date) {
       var date = Jiffy(movRelease, "yyyy-mm-dd").format("dd.mm.yyyy");

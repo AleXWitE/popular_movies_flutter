@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:popular_films/commons/api/services/modal_services.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
@@ -13,7 +13,7 @@ import 'widgets/tab_trailers.dart';
 class MovieScreen extends StatefulWidget {
   MovieScreen({Key key, this.movie}) : super(key: key);
 
-  final String movie;
+  final int movie;
 
   @override
   _MovieScreenState createState() => _MovieScreenState();
@@ -21,7 +21,7 @@ class MovieScreen extends StatefulWidget {
 
 class _MovieScreenState extends State<MovieScreen>
     with TickerProviderStateMixin {
-  int id = 580489;
+  // int id = widget.movie;
   List<CachedNetworkImage> _cachedImgs = [];
 
   final _tabItems = [
@@ -52,14 +52,19 @@ class _MovieScreenState extends State<MovieScreen>
   Future<List<MovieImages>> movImages;
   List<MovieImages> _movImgs;
 
-  _getImages() async {
-    movImages = getAllImages(id);
-    _movImgs = await movImages;
+  _getDetails() async {
+    movDetails = getDescription(widget.movie);
+    _movDet = await movDetails;
   }
 
-  _getDetails() async {
-    movDetails = getDescription(id);
-    _movDet = await movDetails;
+  _addImgs(Future<List> _list) async {
+    for (var item in await _list as List<MovieImages>)
+      _cachedImgs.add(CachedNetworkImage(
+        imageUrl: "$_imgUrl${item.imgUrl}",
+        placeholder: (context, url) => CircularProgressIndicator(),
+        errorWidget: (context, url, error) => Icon(Icons.error),
+      ));
+    return _cachedImgs;
   }
 
   @override
@@ -67,8 +72,8 @@ class _MovieScreenState extends State<MovieScreen>
     super.initState();
     _getDetails();
     // _getImages();
-    movImages = getAllImages(id);
-
+    movImages = getAllImages(widget.movie);
+    _addImgs(movImages);
   }
 
   @override
@@ -86,6 +91,18 @@ class _MovieScreenState extends State<MovieScreen>
     Curve curve = Curves.easeIn;
     bool _slider = true;
 
+    // _markChildren() {
+    //   for (int _i = 0; _i < _cachedImgs.length; _i++)
+    //     Container(
+    //       height: 10.0,
+    //       width: 10.0,
+    //       decoration: BoxDecoration(
+    //         borderRadius: BorderRadius.circular(5.0),
+    //         color: _i == _pageId ? Colors.teal[400] : Colors.grey[500],
+    //       ),
+    //     );
+    // }
+
     return Scaffold(
       // appBar: AppBar(
       //   title: Text(
@@ -101,52 +118,16 @@ class _MovieScreenState extends State<MovieScreen>
       //         size: 25.0,
       //       )),
       // ),
-      // body: Column(children: [
-      //   Container(
-      //     height: 50.0,
-      //     child: Container(
-      //       color: Theme.of(context).backgroundColor,
-      //       child: TabBar(
-      //         tabs: _tabItems,
-      //         controller: tabController,
-      //         // indicatorColor: Theme.of(context).cardColor,
-      //         labelStyle: TextStyle(fontSize: 12.0),
-      //         labelColor: Theme.of(context).primaryColor,
-      //         unselectedLabelColor: Colors.grey[400],
-      //       ),
-      //     ),
-      //   ),
-      //   Expanded(
-      //     child: FutureBuilder<MovieDetails>(
-      //         future: movDetails,
-      //         builder: (context, snapshot) {
-      //           print('*-> ${snapshot.connectionState}');
-      //           if (snapshot.connectionState != ConnectionState.done) {
-      //             return Text('*-> ${snapshot.connectionState}');
-      //           } else {
-      //             if (snapshot.hasData) {
-      //               return TabBarView(
-      //                 children: [
-      //                   TabDescription(
-      //                     id: id,
-      //                     details: snapshot.data,
-      //                   ),
-      //                   TabTrailers(id: id),
-      //                   TabReview(id: id),
-      //                 ],
-      //                 controller: tabController,
-      //               );
-      //             } else
-      //               return Text('*-> Ничего нет');
-      //           }
-      //         }),
-      //   ),
-      // ]),
+
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             backgroundColor: Theme.of(context).cardColor,
-            title: Text("Film", style: TextStyle(fontSize: 21.0, color: Theme.of(context).primaryColor),),
+            title: Text(
+              "Film",
+              style: TextStyle(
+                  fontSize: 21.0, color: Theme.of(context).primaryColor),
+            ),
             leading: GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Icon(
@@ -164,51 +145,97 @@ class _MovieScreenState extends State<MovieScreen>
               height: 200.0,
               width: MediaQuery.of(context).size.width,
               child: FutureBuilder<List<MovieImages>>(
-                initialData: [],
-                future: movImages,
-                builder: (context, snapshot) {
-                  for(var item in snapshot.data)
-                  _cachedImgs.add(CachedNetworkImage(
-                    imageUrl: item.imgUrl,
-                    placeholder: (context, url) => CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
-                  ));
+                  initialData: [],
+                  future: movImages,
+                  builder: (context, snapshot) {
+                    // Future<Null> _changePage(int _id, List _list) async {
+                    //   while (_slider == true) {
+                    //     await Future.delayed(Duration(seconds: 3));
+                    //     if (_pageId == _list.length - 1)
+                    //         _pageId = 0;
+                    //     else
+                    //       _pageId++;
+                    //     _pageController.animateToPage(_pageId,
+                    //         duration: Duration(milliseconds: 500),
+                    //         curve: curve);
+                    //   }
+                    // }
 
-                  return Stack(
-                  children: [
+                    // _changePage(_pageId, snapshot.data);
 
-                    Positioned(
-                      child: PageView(
-                        onPageChanged: (value) => _pageId = value,
-                      controller: _pageController,
-                      children: [
-                        for(var imgs in _cachedImgs)
-                          Image(image: CachedNetworkImageProvider(imgs.imageUrl),)
-                      ],
-                    ),),
-                    Positioned(
-                      top: 10.0,
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            for(int i = 0;  i < snapshot.data.length; i++)
-                              Container(
-                                height: 10.0,
-                                width: 10.0,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5.0),
-                                  color: i == _pageId ? Colors.teal[400] : Colors.grey[500],
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ); }
-              ),
+                    // return Stack(
+                    //   children: [
+                    //     Positioned(
+                    //       child: PageView(
+                    //         onPageChanged: (value) =>
+                    //             _changePage(value, _cachedImgs),
+                    //         controller: _pageController,
+                    //         children: [
+                    //           for (var imgs in _cachedImgs)
+                    //             Image(
+                    //               image:
+                    //                   CachedNetworkImageProvider(imgs.imageUrl),
+                    //             )
+                    //         ],
+                    //       ),
+                    //     ),
+                    //     Positioned(
+                    //       top: 10.0,
+                    //       child: Container(
+                    //         width: MediaQuery.of(context).size.width,
+                    //         child: Row(
+                    //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    //           children: [
+                    //             for (int _i = 0; _i < _cachedImgs.length; _i++)
+                    //               Container(
+                    //                 height: 10.0,
+                    //                 width: 10.0,
+                    //                 decoration: BoxDecoration(
+                    //                   borderRadius: BorderRadius.circular(5.0),
+                    //                   color: _i == _pageId
+                    //                       ? Colors.teal[400]
+                    //                       : Colors.grey[500],
+                    //                 ),
+                    //               )
+                    //           ],
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // );
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else {
+                      if (snapshot.hasData) {
+                        return Swiper(
+                          itemCount: snapshot.data.length,
+                          autoplay: true,
+                          autoplayDelay: 3,
+                          loop: true,
+                          // duration: 1,
+                          onIndexChanged: (value) => value,
+                          pagination: SwiperPagination(
+                            alignment: Alignment.topCenter,
+                            margin: EdgeInsets.all(20.0),
+                            builder: DotSwiperPaginationBuilder(
+                                color: Colors.grey[500],
+                                activeColor: Colors.teal[400],
+                                size: 5.0,
+                                activeSize: 10.0)
+                          ),
+                          itemWidth: MediaQuery.of(context).size.width,
+                          itemBuilder: (context, index) => Image(
+                            image: CachedNetworkImageProvider(
+                                _cachedImgs[index].imageUrl),
+                            fit: BoxFit.fill,
+                          ),
+                        );
+                      } else
+                        return Text("*- ничего нет");
+                    }
+                  }),
             ),
           ),
           SliverList(
@@ -231,7 +258,9 @@ class _MovieScreenState extends State<MovieScreen>
               future: movDetails,
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
-                  return Center(child: CircularProgressIndicator(),);
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
                 } else {
                   if (snapshot.hasData) {
                     return Container(
@@ -239,11 +268,11 @@ class _MovieScreenState extends State<MovieScreen>
                       child: TabBarView(
                         children: [
                           TabDescription(
-                            id: id,
+                            id: widget.movie,
                             details: snapshot.data,
                           ),
-                          TabTrailers(id: id),
-                          TabReview(id: id),
+                          TabTrailers(id: widget.movie),
+                          TabReview(id: widget.movie),
                         ],
                         controller: tabController,
                       ),

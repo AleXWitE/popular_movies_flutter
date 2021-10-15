@@ -19,7 +19,7 @@ Future<List<YoutubeVideosKeys>> getAllYoutube(int id) async {
   return allYoutubeFromJson(response.body);
 }
 
-Future getPopular(int page) async {
+Future<List<MovieItem>> getPopular(int page) async {
   var _uri = Uri.parse('$_url/popular?page=$page&api_key=$_key');
   final http.Response response = await http.get(
       _uri,
@@ -27,7 +27,18 @@ Future getPopular(int page) async {
         "Accept": "application/json",
       }
   );
-  // return
+  return pagePopularAndRated(response.body);
+}
+
+Future<List<MovieItem>> getTopRated(int page) async {
+  var _uri = Uri.parse('$_url/top_rated?page=$page&api_key=$_key');
+  final http.Response response = await http.get(
+      _uri,
+      headers: {
+        "Accept": "application/json",
+      }
+  );
+  return pagePopularAndRated(response.body);
 }
 
 Future<List<MovieImages>> getAllImages(int id) async {

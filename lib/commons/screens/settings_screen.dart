@@ -68,7 +68,7 @@ class _SettingScreenState extends State<SettingScreen> {
           ListTile(
             leading: Icon(Icons.sort),
             title: Text("Режим сортировки"),
-            subtitle: Text(popRadio),
+            subtitle: Text(popRadio == "rate" ? "По рейтингу" : "По популярности"),
             onTap: () =>
                 showDialog(
                   context: context,
@@ -80,19 +80,19 @@ class _SettingScreenState extends State<SettingScreen> {
                           child: Column(
                             children: [
                               RadioListTile(
-                                value: "По популярности",
+                                value: "popular",
                                 groupValue: popRadio,
                                 onChanged: (newValue) {
                                   setState(() => popRadio = newValue.toString());
-                                  Navigator.pop(context, "Популярное");
+                                  Navigator.pop(context);
                                 },
                                 title: Text("По популярности"),),
                               RadioListTile(
-                                value: "По рейтингу",
+                                value: "rate",
                                 groupValue: popRadio,
                                 onChanged: (newValue) {
                                   setState(() => popRadio = newValue.toString());
-                                  Navigator.pop(context, "Рейтинг");
+                                  Navigator.pop(context);
                                 },
                                 title: Text("По рейтингу"),),
                             ],

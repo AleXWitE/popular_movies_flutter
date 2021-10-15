@@ -29,6 +29,7 @@ dependencies:
   provider: any
   cached_network_image: any
   money2: any
+  flutter_swiper: any
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
