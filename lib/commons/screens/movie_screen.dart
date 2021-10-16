@@ -26,6 +26,8 @@ class _MovieScreenState extends State<MovieScreen>
     with TickerProviderStateMixin {
   List<CachedNetworkImage> _cachedImgs = [];
 
+  ScrollController _scrollController = ScrollController();
+
   final _tabItems = [
     const Tab(
       text: "ИНФОРМАЦИЯ",
@@ -96,14 +98,18 @@ class _MovieScreenState extends State<MovieScreen>
   Widget build(BuildContext context) {
     final _movMeta = ModalRoute.of(context).settings.arguments as Map;
     final _cachedPoster = _movMeta['moviePoster'] as CachedNetworkImage;
+    int tabIndex = 0;
 
     PageController _pageController = PageController(initialPage: 0);
     TabController tabController =
         TabController(length: _tabItems.length, vsync: this);
-    int _pageId = 0;
-    String _genres = _movDet.movGenres.toString().substring(1, _movDet.movGenres.toString().length - 1);
+    setState(() => tabController.index = tabIndex);
 
-    _appBarBackground(){
+    String _genres = _movDet.movGenres
+        .toString()
+        .substring(1, _movDet.movGenres.toString().length - 1);
+
+    _appBarBackground() {
       return Stack(
         overflow: Overflow.visible,
         children: [
@@ -115,24 +121,24 @@ class _MovieScreenState extends State<MovieScreen>
               child: _cachedImgs.length == 0
                   ? Container()
                   : CarouselSlider.builder(
-                itemCount: _cachedImgs.length,
-                carouselController: _carouselController,
-                itemBuilder: (context, index, reason) => Image(
-                  image: CachedNetworkImageProvider(
-                      _cachedImgs[index].imageUrl),
-                  fit: BoxFit.fill,
-                ),
-                options: CarouselOptions(
-                    autoPlay: true,
-                    autoPlayCurve: curve,
-                    autoPlayInterval: Duration(seconds: 5),
-                    enlargeCenterPage: false,
-                    viewportFraction: 1.0,
-                    autoPlayAnimationDuration:
-                    Duration(microseconds: 800),
-                    onPageChanged: (index, reason) =>
-                        setState(() => _current = index)),
-              ),
+                      itemCount: _cachedImgs.length,
+                      carouselController: _carouselController,
+                      itemBuilder: (context, index, reason) => Image(
+                        image: CachedNetworkImageProvider(
+                            _cachedImgs[index].imageUrl),
+                        fit: BoxFit.fill,
+                      ),
+                      options: CarouselOptions(
+                          autoPlay: true,
+                          autoPlayCurve: curve,
+                          autoPlayInterval: Duration(seconds: 5),
+                          enlargeCenterPage: false,
+                          viewportFraction: 1.0,
+                          autoPlayAnimationDuration:
+                              Duration(microseconds: 800),
+                          onPageChanged: (index, reason) =>
+                              setState(() => _current = index)),
+                    ),
             ),
             Container(
               color: Theme.of(context).cardColor,
@@ -147,27 +153,33 @@ class _MovieScreenState extends State<MovieScreen>
               width: MediaQuery.of(context).size.width / 2,
               height: 125.0,
               child: RichText(
-
                 overflow: TextOverflow.fade,
                 text: TextSpan(
                     text: "${_setDateDesc(_movDet.movRelease)}\n",
                     style: TextStyle(color: Colors.grey[500], height: 2.0),
                     children: [
                       TextSpan(
-                        text: "${_movDet.movOrigTitle}\n",
-                        style: TextStyle(color: Colors.white, fontSize: 16.0,height: 1.2),
+                        text: _movDet.movOrigTitle.length < 17
+                            ? "${_movDet.movOrigTitle}\n"
+                            : "${_movDet.movOrigTitle.substring(0, 15)}...\n",
+                        style: TextStyle(
+                            color: Colors.white, fontSize: 16.0, height: 1.2),
                       ),
                       TextSpan(
-                        text: _movDet.movTagline != '' ? "${_movDet.movTagline.substring(0, 30)}...\n" : "\n",
-                        style: TextStyle(color: Colors.white, fontSize: 13.0, height: 1.6),
+                        text: _movDet.movTagline != ''
+                            ? _movDet.movTagline.length > 27
+                                ? "${_movDet.movTagline.substring(0, 25)}...\n"
+                                : "${_movDet.movTagline}...\n"
+                            : "\n",
+                        style: TextStyle(
+                            color: Colors.white, fontSize: 13.0, height: 1.6),
                       ),
                       // TextSpan(text: "\n", style: TextStyle(fontSize: 5.0, height: 2.0)),
                       TextSpan(
                         text: "$_genres",
-                        style: TextStyle(color: Colors.grey[500], height: 1.0),
+                        style: TextStyle(color: Colors.grey[500], height: 1.2),
                       )
-                    ]
-                ),
+                    ]),
               ),
             ),
           ),
@@ -180,9 +192,8 @@ class _MovieScreenState extends State<MovieScreen>
                 return Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5.0),
-                    color: _current == e.key
-                        ? Colors.teal[400]
-                        : Colors.grey[500],
+                    color:
+                        _current == e.key ? Colors.teal[400] : Colors.grey[500],
                   ),
                   width: _current == e.key ? 10.0 : 5.0,
                   height: _current == e.key ? 10.0 : 5.0,
@@ -214,12 +225,8 @@ class _MovieScreenState extends State<MovieScreen>
                     color: Colors.teal[500],
                   ),
                   child: Icon(
-                    _inFav == true
-                        ? Icons.favorite
-                        : Icons.favorite_border,
-                    color: _inFav == true
-                        ? Colors.red[600]
-                        : Colors.grey[500],
+                    _inFav == true ? Icons.favorite : Icons.favorite_border,
+                    color: _inFav == true ? Colors.red[600] : Colors.grey[500],
                     size: 25.0,
                   ),
                 ),
@@ -228,135 +235,116 @@ class _MovieScreenState extends State<MovieScreen>
       );
     }
 
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            backgroundColor: Theme.of(context).cardColor,
-            title: Text(
-              _movMeta['movieTitle'],
-              style: TextStyle(
-                  fontSize: 18.0, color: Theme.of(context).primaryColor),
-            ),
-            leading: GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: Theme.of(context).primaryColor,
-                  size: 25.0,
-                )),
-            pinned: true,
-            floating: false,
-            expandedHeight: 290.0,
-            flexibleSpace: FlexibleSpaceBar(
-              background: _appBarBackground(),
-
-            ),
-          ),
-          SliverList(
-              delegate: SliverChildListDelegate([
-            Container(
-              height: 50.0,
-              child: Container(
-                color: Theme.of(context).backgroundColor,
-                child: TabBar(
-                  tabs: _tabItems,
-                  controller: tabController,
-                  indicatorColor: Colors.teal[500],
-                  // indicatorColor: Theme.of(context).cardColor,
-                  labelStyle: TextStyle(fontSize: 12.0),
-                  labelColor: Theme.of(context).primaryColor,
-                  unselectedLabelColor: Colors.grey[400],
+    return _movDet == null && _movDet.movGenres == null
+        ? Scaffold(
+            body: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: Theme.of(context).cardColor,
+                  title: Text(
+                    _movMeta['movieTitle'],
+                    style: TextStyle(
+                        fontSize: 18.0, color: Theme.of(context).primaryColor),
+                  ),
+                  leading: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: Theme.of(context).primaryColor,
+                        size: 25.0,
+                      )),
+                  expandedHeight: 290.0,
                 ),
-              ),
+                SliverList(
+                    delegate: SliverChildListDelegate([
+                  Container(
+                    height: 50.0,
+                    color: Theme.of(context).backgroundColor,
+                  ),
+                  Container(
+                    height: MediaQuery.of(context).size.height - 340.0,
+                  )
+                ]))
+              ],
             ),
-            FutureBuilder<MovieDetails>(
-              future: movDetails,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else {
-                  if (snapshot.hasData) {
-                    return Container(
-                      height: MediaQuery.of(context).size.height - 130.0,
-                      child: TabBarView(
-                        children: [
-                          TabDescription(
-                            id: widget.movie,
-                            details: snapshot.data,
-                          ),
-                          TabTrailers(id: widget.movie),
-                          TabReview(id: widget.movie),
-                        ],
-                        controller: tabController,
+          )
+        : Scaffold(
+            body: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: Theme.of(context).cardColor,
+                  title: Text(
+                    _movMeta['movieTitle'],
+                    style: TextStyle(
+                        fontSize: 18.0, color: Theme.of(context).primaryColor),
+                  ),
+                  leading: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: Theme.of(context).primaryColor,
+                        size: 25.0,
+                      )),
+                  pinned: true,
+                  floating: false,
+                  expandedHeight: 330.0,
+                  bottom: PreferredSize(
+                    preferredSize: Size.fromHeight(50.0),
+                    child: Container(
+                      height: 50.0,
+                      child: Container(
+                        color: Theme.of(context).backgroundColor,
+                        child: TabBar(
+                          tabs: _tabItems,
+                          controller: tabController,
+
+                          onTap: (index) => setState(() => tabIndex = index),
+                          indicatorColor: Colors.teal[500],
+                          labelStyle: TextStyle(fontSize: 12.0),
+                          labelColor: Theme.of(context).primaryColor,
+                          unselectedLabelColor: Colors.grey[400],
+                        ),
                       ),
-                    );
-                  } else
-                    return Text('*-> Ничего нет');
-                }
-              },
-            )
-          ]))
-        ],
-      ),
-    );
+                    ),
+                  ),
+                  flexibleSpace: FlexibleSpaceBar(
+                    collapseMode: CollapseMode.parallax,
+                    background: _appBarBackground(),
+                  ),
+                ),
+                SliverList(
+                    delegate: SliverChildListDelegate([
+                  // FutureBuilder<MovieDetails>(
+                  //   future: movDetails,
+                  //   builder: (context, snapshot) {
+                  //     if (snapshot.connectionState != ConnectionState.done) {
+                  //       return Center(
+                  //         child: CircularProgressIndicator(),
+                  //       );
+                  //     } else {
+                  //       if (snapshot.hasData) {
+                          /*return*/ Container(
+                            height: MediaQuery.of(context).size.height - 130.0,
+                            child: TabBarView(
+                                children: [
+                                  TabDescription(
+                                    id: widget.movie,
+                                    details: _movDet,
+                                  ),
+                                  TabTrailers(id: widget.movie),
+                                  TabReview(id: widget.movie),
+                                ],
+                                controller: tabController,
+                              ),
+                          )
+                      //   } else
+                      //     return Text('*-> Ничего нет');
+                      // }
+
+                ]))
+              ],
+            ),
+          );
   }
 }
-
-// Future<Null> _changePage(int _id, List _list) async {
-//   while (_slider == true) {
-//     await Future.delayed(Duration(seconds: 3));
-//     if (_pageId == _list.length - 1)
-//         _pageId = 0;
-//     else
-//       _pageId++;
-//     _pageController.animateToPage(_pageId,
-//         duration: Duration(milliseconds: 500),
-//         curve: curve);
-//   }
-// }
-
-// _changePage(_pageId, snapshot.data);
-
-// return Stack(
-//   children: [
-//     Positioned(
-//       child: PageView(
-//         onPageChanged: (value) =>
-//             _changePage(value, _cachedImgs),
-//         controller: _pageController,
-//         children: [
-//           for (var imgs in _cachedImgs)
-//             Image(
-//               image:
-//                   CachedNetworkImageProvider(imgs.imageUrl),
-//             )
-//         ],
-//       ),
-//     ),
-//     Positioned(
-//       top: 10.0,
-//       child: Container(
-//         width: MediaQuery.of(context).size.width,
-//         child: Row(
-//           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//           children: [
-//             for (int _i = 0; _i < _cachedImgs.length; _i++)
-//               Container(
-//                 height: 10.0,
-//                 width: 10.0,
-//                 decoration: BoxDecoration(
-//                   borderRadius: BorderRadius.circular(5.0),
-//                   color: _i == _pageId
-//                       ? Colors.teal[400]
-//                       : Colors.grey[500],
-//                 ),
-//               )
-//           ],
-//         ),
-//       ),
-//     ),
-//   ],
-// );

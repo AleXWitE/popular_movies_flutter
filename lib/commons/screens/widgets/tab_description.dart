@@ -144,7 +144,7 @@ class TabDescription extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  padding: EdgeInsets.fromLTRB(0.0, 10.0, 10.0, 10.0),
+                  padding: EdgeInsets.fromLTRB(0.0, 0.0, 10.0, 10.0),
                   child: Image.asset(
                     "lib/img/tmdb.png",
                     width: 35.0,
@@ -233,6 +233,7 @@ class TabDescription extends StatelessWidget {
 
     return Column(
       children: [
+        SizedBox(height: 20.0,),
         _row(),
         Divider(
           thickness: 1.0,

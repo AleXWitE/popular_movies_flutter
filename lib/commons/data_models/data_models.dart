@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 
 class MovieList {
   final List<MovieItem> movies;
@@ -67,16 +68,41 @@ class PopularMovieImgs{
 class MovieReviews{
   int id;
   String author;
-  String content;
+  String fullContent;
+  String shortContent;
+  bool isExpansed;
 
-  MovieReviews({this.id, this.author, this.content});
+  MovieReviews({this.id, this.author, this.fullContent, this.shortContent, this.isExpansed});
 
   factory MovieReviews.fromJson(Map<String, dynamic> json){
     int i = 0;
+    bool _result;
+    String _fullContent;
+    String _shortContent;
+    if(json['content'].toString().length < 125){
+      _fullContent = json['content'];
+      _shortContent = json['content'];
+      _result = false;
+    }
+    else{
+      _result = true;
+      _fullContent = json['content'];
+      _shortContent = json['content'].toString().substring(0, 123) + '...';
+    }
+
     return MovieReviews(
       id: i++,
       author: json['author'],
-      content: json['content'],
+      fullContent: _fullContent,
+      shortContent: _shortContent,
+      isExpansed: _result,
     );
   }
+}
+
+class IsExpansed{
+  int id;
+  bool isExpansed;
+
+  IsExpansed({this.id, this.isExpansed});
 }
