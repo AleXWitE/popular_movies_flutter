@@ -10,7 +10,7 @@ class MovieGridItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/home/${item.id}', arguments: {'movieTitle' : item.title}),
+      onTap: () => Navigator.pushNamed(context, '/home/${item.id}', arguments: {'movieTitle' : item.title, 'moviePoster' : item.cachedImg}),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(5.0),
         child: Image(image: CachedNetworkImageProvider(item.cachedImg.imageUrl), fit: BoxFit.fill,),

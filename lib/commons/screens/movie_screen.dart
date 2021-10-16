@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:popular_films/commons/api/services/modal_services.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
@@ -11,7 +11,10 @@ import 'widgets/tab_review.dart';
 import 'widgets/tab_trailers.dart';
 
 class MovieScreen extends StatefulWidget {
-  MovieScreen({Key key, this.movie}) : super(key: key);
+  MovieScreen({
+    Key key,
+    this.movie,
+  }) : super(key: key);
 
   final int movie;
 
@@ -44,15 +47,23 @@ class _MovieScreenState extends State<MovieScreen>
     return date;
   }
 
+  bool _inFav = false;
+
   Future<MovieDetails> movDetails;
   MovieDetails _movDet;
 
   Future<List<MovieImages>> movImages;
   List<MovieImages> _movImgs;
 
+  int _current = 0;
+  final CarouselController _carouselController = CarouselController();
+  Curve curve = Curves.easeIn;
+
   _getDetails() async {
     movDetails = getDescription(widget.movie);
     _movDet = await movDetails;
+    setState(() => _movDet);
+    return _movDet;
   }
 
   _addImgs(Future<List> _list) async {
@@ -62,6 +73,7 @@ class _MovieScreenState extends State<MovieScreen>
         placeholder: (context, url) => CircularProgressIndicator(),
         errorWidget: (context, url, error) => Icon(Icons.error),
       ));
+    setState(() => _cachedImgs);
     return _cachedImgs;
   }
 
@@ -71,6 +83,7 @@ class _MovieScreenState extends State<MovieScreen>
     _getDetails();
     movImages = getAllImages(widget.movie);
     _addImgs(movImages);
+    print(widget.movie);
   }
 
   @override
@@ -81,22 +94,147 @@ class _MovieScreenState extends State<MovieScreen>
 
   @override
   Widget build(BuildContext context) {
-    final _movTitle = ModalRoute.of(context).settings.arguments as Map;
+    final _movMeta = ModalRoute.of(context).settings.arguments as Map;
+    final _cachedPoster = _movMeta['moviePoster'] as CachedNetworkImage;
 
     PageController _pageController = PageController(initialPage: 0);
     TabController tabController =
         TabController(length: _tabItems.length, vsync: this);
     int _pageId = 0;
-    Curve curve = Curves.easeIn;
+    String _genres = _movDet.movGenres.toString().substring(1, _movDet.movGenres.toString().length - 1);
+
+    _appBarBackground(){
+      return Stack(
+        overflow: Overflow.visible,
+        children: [
+          Column(children: [
+            Container(
+              height: 200.0,
+              color: Theme.of(context).cardColor,
+              width: MediaQuery.of(context).size.width,
+              child: _cachedImgs.length == 0
+                  ? Container()
+                  : CarouselSlider.builder(
+                itemCount: _cachedImgs.length,
+                carouselController: _carouselController,
+                itemBuilder: (context, index, reason) => Image(
+                  image: CachedNetworkImageProvider(
+                      _cachedImgs[index].imageUrl),
+                  fit: BoxFit.fill,
+                ),
+                options: CarouselOptions(
+                    autoPlay: true,
+                    autoPlayCurve: curve,
+                    autoPlayInterval: Duration(seconds: 5),
+                    enlargeCenterPage: false,
+                    viewportFraction: 1.0,
+                    autoPlayAnimationDuration:
+                    Duration(microseconds: 800),
+                    onPageChanged: (index, reason) =>
+                        setState(() => _current = index)),
+              ),
+            ),
+            Container(
+              color: Theme.of(context).cardColor,
+              height: 125.0,
+            )
+          ]),
+          Positioned(
+            right: 10.0,
+            top: 200.0,
+            child: Container(
+              // color: Colors.white,
+              width: MediaQuery.of(context).size.width / 2,
+              height: 125.0,
+              child: RichText(
+
+                overflow: TextOverflow.fade,
+                text: TextSpan(
+                    text: "${_setDateDesc(_movDet.movRelease)}\n",
+                    style: TextStyle(color: Colors.grey[500], height: 2.0),
+                    children: [
+                      TextSpan(
+                        text: "${_movDet.movOrigTitle}\n",
+                        style: TextStyle(color: Colors.white, fontSize: 16.0,height: 1.2),
+                      ),
+                      TextSpan(
+                        text: _movDet.movTagline != '' ? "${_movDet.movTagline.substring(0, 30)}...\n" : "\n",
+                        style: TextStyle(color: Colors.white, fontSize: 13.0, height: 1.6),
+                      ),
+                      // TextSpan(text: "\n", style: TextStyle(fontSize: 5.0, height: 2.0)),
+                      TextSpan(
+                        text: "$_genres",
+                        style: TextStyle(color: Colors.grey[500], height: 1.0),
+                      )
+                    ]
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            width: MediaQuery.of(context).size.width,
+            top: 40.0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: _cachedImgs.asMap().entries.map((e) {
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5.0),
+                    color: _current == e.key
+                        ? Colors.teal[400]
+                        : Colors.grey[500],
+                  ),
+                  width: _current == e.key ? 10.0 : 5.0,
+                  height: _current == e.key ? 10.0 : 5.0,
+                );
+              }).toList(),
+            ),
+          ),
+          Positioned(
+              left: 20.0,
+              top: 100.0,
+              child: Image(
+                image: CachedNetworkImageProvider(_cachedPoster.imageUrl),
+                width: 140.0,
+                height: 200.0,
+                fit: BoxFit.fill,
+              )),
+          Positioned(
+              top: 170.0,
+              right: 20.0,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() => _inFav = !_inFav);
+                },
+                child: Container(
+                  width: 60.0,
+                  height: 60.0,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30.0),
+                    color: Colors.teal[500],
+                  ),
+                  child: Icon(
+                    _inFav == true
+                        ? Icons.favorite
+                        : Icons.favorite_border,
+                    color: _inFav == true
+                        ? Colors.red[600]
+                        : Colors.grey[500],
+                    size: 25.0,
+                  ),
+                ),
+              )),
+        ],
+      );
+    }
 
     return Scaffold(
-
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             backgroundColor: Theme.of(context).cardColor,
             title: Text(
-              _movTitle['movieTitle'],
+              _movMeta['movieTitle'],
               style: TextStyle(
                   fontSize: 18.0, color: Theme.of(context).primaryColor),
             ),
@@ -109,51 +247,10 @@ class _MovieScreenState extends State<MovieScreen>
                 )),
             pinned: true,
             floating: false,
-            expandedHeight: 160.0,
-            flexibleSpace: FlexibleSpaceBar(),
-          ),
-          SliverToBoxAdapter(
-            child: Container(
-              height: 200.0,
-              width: MediaQuery.of(context).size.width,
-              child: FutureBuilder<List<MovieImages>>(
-                  initialData: [],
-                  future: movImages,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState != ConnectionState.done) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else {
-                      if (snapshot.hasData) {
-                        return Swiper(
-                          itemCount: snapshot.data.length,
-                          autoplay: true,
-                          autoplayDelay: 1,
-                          loop: true,
-                          index: 0,
-                          duration: 100,
-                          onIndexChanged: (value) => print(value),
-                          pagination: SwiperPagination(
-                            alignment: Alignment.topCenter,
-                            margin: EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 0.0),
-                            builder: DotSwiperPaginationBuilder(
-                                color: Colors.grey[500],
-                                activeColor: Colors.teal[400],
-                                size: 5.0,
-                                activeSize: 7.0)
-                          ),
-                          itemWidth: MediaQuery.of(context).size.width,
-                          itemBuilder: (context, index) => Image(
-                            image: CachedNetworkImageProvider(
-                                _cachedImgs[index].imageUrl),
-                            fit: BoxFit.fill,
-                          ),
-                        );
-                      } else
-                        return Text("*- ничего нет");
-                    }
-                  }),
+            expandedHeight: 290.0,
+            flexibleSpace: FlexibleSpaceBar(
+              background: _appBarBackground(),
+
             ),
           ),
           SliverList(
@@ -165,6 +262,7 @@ class _MovieScreenState extends State<MovieScreen>
                 child: TabBar(
                   tabs: _tabItems,
                   controller: tabController,
+                  indicatorColor: Colors.teal[500],
                   // indicatorColor: Theme.of(context).cardColor,
                   labelStyle: TextStyle(fontSize: 12.0),
                   labelColor: Theme.of(context).primaryColor,

@@ -19,7 +19,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   String popRadio = "popular";
   bool favCheckbox;
   bool animCheckbox;
-  String _imgUrl = 'https://image.tmdb.org/t/p/w300';
+  String _imgUrl = 'https://image.tmdb.org/t/p/w200';
   ScrollController _scrollController;
 
   int page = 1;
@@ -67,7 +67,6 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     _getPrefs();
     _getMovies(page);
     _scrollController = ScrollController(initialScrollOffset: 0.0, keepScrollOffset: true,);
-    // movieItems = getPopular(initialPage).asStream();
     _addImgs(movieItems);
     WidgetsBinding.instance.addObserver(this);
   }

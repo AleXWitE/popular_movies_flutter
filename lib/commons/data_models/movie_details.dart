@@ -11,6 +11,7 @@ class MovieDetails {
   String movLanguage;
   double movVote;
   List movGenres;
+  String movTagline;
 
   MovieDetails(
       {this.id,
@@ -24,7 +25,8 @@ class MovieDetails {
       this.movRelease,
       this.movBudget,
       this.movRevenue,
-      this.movHomepage});
+      this.movHomepage,
+      this.movTagline});
 
   factory MovieDetails.fromJson(Map<String, dynamic> json){
     var list = json['genres'] as List;
@@ -44,7 +46,8 @@ class MovieDetails {
       movRelease: json['release_date'],
       movBudget: json['budget'],
       movRevenue: json['revenue'],
-      movHomepage: json['homepage']
+      movHomepage: json['homepage'],
+      movTagline: json['tagline'],
     );
   }
 }
