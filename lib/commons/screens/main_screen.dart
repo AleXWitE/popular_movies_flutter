@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:popular_films/commons/api/services/modal_services.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
+import 'package:popular_films/commons/screens/widgets/empty_movie_grid.dart';
 import 'package:popular_films/commons/screens/widgets/movie_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,7 +26,15 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   int page = 1;
 
   Future<List<MovieItem>> movieItems;
+  List<MovieItem> emptyMovieItems = [];
   List<PopularMovieImgs> _movPosters = [];
+
+  getEmptyList() {
+    for (int i = 0; i < 20; i++)
+      emptyMovieItems.add(MovieItem(imgUrl: "lib/img/download.png"));
+
+    return emptyMovieItems;
+  }
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -65,8 +74,12 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     _getPrefs();
+    getEmptyList();
     _getMovies(page);
-    _scrollController = ScrollController(initialScrollOffset: 0.0, keepScrollOffset: true,);
+    _scrollController = ScrollController(
+      initialScrollOffset: 0.0,
+      keepScrollOffset: true,
+    );
     _addImgs(movieItems);
     WidgetsBinding.instance.addObserver(this);
   }
@@ -178,12 +191,25 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       ),
       body: FutureBuilder<List<MovieItem>>(
           future: movieItems,
-          initialData: [],
+          initialData: emptyMovieItems,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
+              // return Center(
+              //   child: CircularProgressIndicator(),
+              // );
+              return GridView.builder(
+                  padding: EdgeInsets.all(5.0),
+                  itemCount: emptyMovieItems.length,
+                  controller: _scrollController,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    childAspectRatio: 0.6,
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 5.0,
+                    mainAxisSpacing: 5.0,
+                  ),
+                  itemBuilder: (context, index) {
+                    return EmptyMovieGrid();
+                  });
             } else if (snapshot.hasData) {
               for (var item in snapshot.data)
                 _movPosters.add(PopularMovieImgs(
@@ -206,12 +232,11 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                   mainAxisSpacing: 5.0,
                 ),
                 itemBuilder: (context, index) {
-
                   return MovieGridItem(_movPosters[index]);
                 },
               );
             } else
-              return Text("*- ничего нет");
+              return Center(child: Text("Проверьте интернет соединение!"));
           }),
     );
   }

@@ -19,16 +19,9 @@ class _TabTrailersState extends State<TabTrailers> {
     super.initState();
     getYoutube = getAllYoutube(widget.id);
   }
-  //
-  // _getData(int _id) {
-  //   getYoutube = getAllYoutube(_id);
-  //   return getYoutube;
-  // }
 
   @override
   Widget build(BuildContext context) {
-    getYoutube = getAllYoutube(widget.id);
-
     return FutureBuilder<List<YoutubeVideosKeys>>(
       future: getYoutube,
       initialData: [],

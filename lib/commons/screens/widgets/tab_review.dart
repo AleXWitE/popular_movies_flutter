@@ -39,8 +39,10 @@ class _TabReviewState extends State<TabReview> {
   Widget build(BuildContext context) {
     return ListView(
       shrinkWrap: true,
-      children: _movRew.asMap().entries.map((e) {
-
+      children:
+      _movRew == null
+        ? []
+        : _movRew.asMap().entries.map((e) {
         return Container(
           padding: EdgeInsets.all(10.0),
           child: Card(

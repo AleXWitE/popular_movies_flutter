@@ -53,18 +53,27 @@ class _MovieScreenState extends State<MovieScreen>
 
   Future<MovieDetails> movDetails;
   MovieDetails _movDet;
+  String _genres;
 
   Future<List<MovieImages>> movImages;
   List<MovieImages> _movImgs;
 
   int _current = 0;
+  int tabIndex;
+
   final CarouselController _carouselController = CarouselController();
   Curve curve = Curves.easeIn;
 
   _getDetails() async {
     movDetails = getDescription(widget.movie);
     _movDet = await movDetails;
-    setState(() => _movDet);
+    setState(() {
+      _movDet;
+      _genres = _movDet.movGenres
+          .toString()
+          .substring(1, _movDet.movGenres.toString().length - 1);
+
+    });
     return _movDet;
   }
 
@@ -83,6 +92,7 @@ class _MovieScreenState extends State<MovieScreen>
   void initState() {
     super.initState();
     _getDetails();
+    tabIndex = 0;
     movImages = getAllImages(widget.movie);
     _addImgs(movImages);
     print(widget.movie);
@@ -98,16 +108,11 @@ class _MovieScreenState extends State<MovieScreen>
   Widget build(BuildContext context) {
     final _movMeta = ModalRoute.of(context).settings.arguments as Map;
     final _cachedPoster = _movMeta['moviePoster'] as CachedNetworkImage;
-    int tabIndex = 0;
 
     PageController _pageController = PageController(initialPage: 0);
     TabController tabController =
         TabController(length: _tabItems.length, vsync: this);
-    setState(() => tabController.index = tabIndex);
-
-    String _genres = _movDet.movGenres
-        .toString()
-        .substring(1, _movDet.movGenres.toString().length - 1);
+    // setState(() => tabController.index = tabIndex);
 
     _appBarBackground() {
       return Stack(
@@ -235,41 +240,41 @@ class _MovieScreenState extends State<MovieScreen>
       );
     }
 
-    return _movDet == null && _movDet.movGenres == null
-        ? Scaffold(
-            body: CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  backgroundColor: Theme.of(context).cardColor,
-                  title: Text(
-                    _movMeta['movieTitle'],
-                    style: TextStyle(
-                        fontSize: 18.0, color: Theme.of(context).primaryColor),
-                  ),
-                  leading: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: Theme.of(context).primaryColor,
-                        size: 25.0,
-                      )),
-                  expandedHeight: 290.0,
-                ),
-                SliverList(
-                    delegate: SliverChildListDelegate([
-                  Container(
-                    height: 50.0,
-                    color: Theme.of(context).backgroundColor,
-                  ),
-                  Container(
-                    height: MediaQuery.of(context).size.height - 340.0,
-                  )
-                ]))
-              ],
-            ),
-          )
-        : Scaffold(
-            body: CustomScrollView(
+    Widget _scaffoldStructure = CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          backgroundColor: Theme.of(context).cardColor,
+          title: Text(
+            _movMeta['movieTitle'],
+            style: TextStyle(
+                fontSize: 18.0, color: Theme.of(context).primaryColor),
+          ),
+          leading: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Icon(
+                Icons.arrow_back,
+                color: Theme.of(context).primaryColor,
+                size: 25.0,
+              )),
+          expandedHeight: 290.0,
+        ),
+        SliverList(
+            delegate: SliverChildListDelegate([
+              Container(
+                height: 50.0,
+                color: Theme.of(context).backgroundColor,
+              ),
+              Container(
+                height: MediaQuery.of(context).size.height - 340.0,
+              )
+            ]))
+      ],
+    );
+
+    return Scaffold(
+            body: _movDet == null
+                ? _scaffoldStructure
+                :  CustomScrollView(
               controller: _scrollController,
               slivers: [
                 SliverAppBar(
@@ -298,8 +303,10 @@ class _MovieScreenState extends State<MovieScreen>
                         child: TabBar(
                           tabs: _tabItems,
                           controller: tabController,
-
-                          onTap: (index) => setState(() => tabIndex = index),
+                          // onTap: (i) => setState((){
+                          //   tabIndex = i;
+                          //   // tabController.index = i;
+                          // }),
                           indicatorColor: Colors.teal[500],
                           labelStyle: TextStyle(fontSize: 12.0),
                           labelColor: Theme.of(context).primaryColor,
@@ -315,18 +322,19 @@ class _MovieScreenState extends State<MovieScreen>
                 ),
                 SliverList(
                     delegate: SliverChildListDelegate([
-                  // FutureBuilder<MovieDetails>(
-                  //   future: movDetails,
-                  //   builder: (context, snapshot) {
-                  //     if (snapshot.connectionState != ConnectionState.done) {
-                  //       return Center(
-                  //         child: CircularProgressIndicator(),
-                  //       );
-                  //     } else {
-                  //       if (snapshot.hasData) {
-                          /*return*/ Container(
-                            height: MediaQuery.of(context).size.height - 130.0,
-                            child: TabBarView(
+                  FutureBuilder<MovieDetails>(
+                      future: movDetails,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState != ConnectionState.done) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else {
+                          if (snapshot.hasData) {
+                            return Container(
+                              height:
+                                  MediaQuery.of(context).size.height - 130.0,
+                              child: TabBarView(
                                 children: [
                                   TabDescription(
                                     id: widget.movie,
@@ -337,11 +345,11 @@ class _MovieScreenState extends State<MovieScreen>
                                 ],
                                 controller: tabController,
                               ),
-                          )
-                      //   } else
-                      //     return Text('*-> Ничего нет');
-                      // }
-
+                            );
+                          } else
+                            return Text('*-> Ничего нет');
+                        }
+                      })
                 ]))
               ],
             ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:money2/money2.dart';
 import 'package:popular_films/commons/data_models/movie_details.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 class TabDescription extends StatelessWidget {
@@ -19,6 +20,11 @@ class TabDescription extends StatelessWidget {
 
   String emptyInfo = "Нет информации";
   String shortEmptyInfo = "Нет инф...";
+
+  _launchUrl() async {
+    final _url = details.movHomepage;
+    await launch(_url);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +46,6 @@ class TabDescription extends StatelessWidget {
     String movLang = details.movLanguage != '' ? details.movLanguage : shortEmptyInfo;
     var movRuntime = details.movRuntime != 0 ? details.movRuntime : shortEmptyInfo;
 
-    print(details.movLanguage);
 
     _setDateInfo(String _date) {
       var date = Jiffy(movRelease, "yyyy-mm-dd").format("dd.mm.yyyy");
@@ -57,61 +62,61 @@ class TabDescription extends StatelessWidget {
           _starBorder, _starBorder, _starBorder, _starBorder, _starBorder,
         ],
       );
-    else if (movVote > 1.5 && movVote < 2.5)
+    else if (movVote >= 1.5 && movVote < 2.5)
       _starRow = Row(
         children: [
           _starHalf, _starBorder, _starBorder, _starBorder, _starBorder,
         ],
       );
-    else if (movVote > 2.5 && movVote < 3.5)
+    else if (movVote >= 2.5 && movVote < 3.5)
       _starRow = Row(
         children: [
           _star, _starBorder, _starBorder, _starBorder, _starBorder,
         ],
       );
-    else if (movVote > 3.5 && movVote < 4.5)
+    else if (movVote >= 3.5 && movVote < 4.5)
       _starRow = Row(
         children: [
           _star, _starHalf, _starBorder, _starBorder, _starBorder,
         ],
       );
-    else if (movVote > 4.5 && movVote < 5)
+    else if (movVote >= 4.5 && movVote < 5)
       _starRow = Row(
         children: [
           _star, _star, _starBorder, _starBorder, _starBorder,
         ],
       );
-    else if (movVote > 5 && movVote < 5.5)
+    else if (movVote >= 5 && movVote < 5.5)
       _starRow = Row(
         children: [
           _star, _star, _starHalf, _starBorder, _starBorder,
         ],
       );
-    else if (movVote > 5.5 && movVote < 6.5)
+    else if (movVote >= 5.5 && movVote < 6.5)
       _starRow = Row(
         children: [
           _star, _star, _star, _starBorder, _starBorder,
         ],
       );
-    else if (movVote > 6.5 && movVote < 7.5)
+    else if (movVote >= 6.5 && movVote < 7.5)
       _starRow = Row(
         children: [
           _star, _star, _star, _starHalf, _starBorder,
         ],
       );
-    else if (movVote > 7.5 && movVote < 8.5)
+    else if (movVote >= 7.5 && movVote < 8.5)
       _starRow = Row(
         children: [
           _star, _star, _star, _star, _starBorder,
         ],
       );
-    else if (movVote > 8.5 && movVote < 9)
+    else if (movVote >= 8.5 && movVote < 9)
       _starRow = Row(
         children: [
           _star, _star, _star, _star, _starHalf,
         ],
       );
-    else if (movVote > 9)
+    else if (movVote >= 9)
       _starRow = Row(
         children: [
           _star, _star, _star, _star, _star,
@@ -276,7 +281,7 @@ class TabDescription extends StatelessWidget {
                       fontWeight: FontWeight.normal,
                     ),
                     recognizer: TapGestureRecognizer()
-                      ..onTap = () => print('tap'),
+                      ..onTap = () => _launchUrl(),
                   ),
                 ]),
           ),
