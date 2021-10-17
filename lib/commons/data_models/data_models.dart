@@ -71,8 +71,9 @@ class MovieReviews{
   String fullContent;
   String shortContent;
   bool isExpansed;
+  bool isExpState;
 
-  MovieReviews({this.id, this.author, this.fullContent, this.shortContent, this.isExpansed});
+  MovieReviews({this.id, this.author, this.fullContent, this.shortContent, this.isExpansed, this.isExpState});
 
   factory MovieReviews.fromJson(Map<String, dynamic> json){
     int i = 0;
@@ -96,6 +97,7 @@ class MovieReviews{
       fullContent: _fullContent,
       shortContent: _shortContent,
       isExpansed: _result,
+      isExpState: false,
     );
   }
 }
