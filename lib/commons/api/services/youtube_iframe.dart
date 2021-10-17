@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
@@ -24,21 +24,21 @@ class _YouTubePlayState extends State<YouTubePlay> {
       params: const YoutubePlayerParams(
         showControls: true,
         autoPlay: false,
-        showFullscreenButton: true,
+        showFullscreenButton: false,
         desktopMode: true,
       ),
     );
-    _controller.onEnterFullscreen = () {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-    };
-    _controller.onExitFullscreen = () {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
-    };
+    // _controller.onEnterFullscreen = () {
+    //   SystemChrome.setPreferredOrientations([
+    //     DeviceOrientation.landscapeLeft,
+    //     DeviceOrientation.landscapeRight,
+    //   ]);
+    // };
+    // _controller.onExitFullscreen = () {
+    //   SystemChrome.setPreferredOrientations([
+    //     DeviceOrientation.portraitUp,
+    //   ]);
+    // };
   }
 
   @override

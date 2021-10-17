@@ -5,6 +5,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:popular_films/commons/api/services/modal_services.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
 import 'package:popular_films/commons/data_models/movie_details.dart';
+import 'package:popular_films/commons/screens/widgets/custom_snackbar.dart';
 
 import 'widgets/tab_description.dart';
 import 'widgets/tab_review.dart';
@@ -24,6 +25,8 @@ class MovieScreen extends StatefulWidget {
 
 class _MovieScreenState extends State<MovieScreen>
     with TickerProviderStateMixin {
+  BuildContext scaffoldContext;
+
   List<CachedNetworkImage> _cachedImgs = [];
 
   ScrollController _scrollController = ScrollController();
@@ -45,7 +48,7 @@ class _MovieScreenState extends State<MovieScreen>
   _setDateDesc(String _date) {
     Jiffy.locale("ru");
 
-    var date = Jiffy(_date, "yyyy-mm-dd").format("MMMM, yyyy").toString();
+    var date = Jiffy(_date, "yyyy-mm-dd").format("mm, yyyy").toString();
     return date;
   }
 
@@ -220,7 +223,11 @@ class _MovieScreenState extends State<MovieScreen>
               right: 20.0,
               child: GestureDetector(
                 onTap: () {
-                  setState(() => _inFav = !_inFav);
+                  setState(() {
+                    _inFav = !_inFav;
+                  });
+                  Scaffold.of(scaffoldContext).showSnackBar(customSnackBar(_inFav));
+
                 },
                 child: Container(
                   width: 60.0,
@@ -274,85 +281,89 @@ class _MovieScreenState extends State<MovieScreen>
     return Scaffold(
             body: _movDet == null
                 ? _scaffoldStructure
-                :  CustomScrollView(
+                :  Builder(
+                  builder: (BuildContext context) {
+                    scaffoldContext = context;
+                  return CustomScrollView(
               controller: _scrollController,
               slivers: [
-                SliverAppBar(
-                  backgroundColor: Theme.of(context).cardColor,
-                  title: Text(
-                    _movMeta['movieTitle'],
-                    style: TextStyle(
-                        fontSize: 18.0, color: Theme.of(context).primaryColor),
-                  ),
-                  leading: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: Theme.of(context).primaryColor,
-                        size: 25.0,
-                      )),
-                  pinned: true,
-                  floating: false,
-                  expandedHeight: 330.0,
-                  bottom: PreferredSize(
-                    preferredSize: Size.fromHeight(50.0),
-                    child: Container(
-                      height: 50.0,
+                  SliverAppBar(
+                    backgroundColor: Theme.of(context).cardColor,
+                    title: Text(
+                      _movMeta['movieTitle'],
+                      style: TextStyle(
+                          fontSize: 18.0, color: Theme.of(context).primaryColor),
+                    ),
+                    leading: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Icon(
+                          Icons.arrow_back,
+                          color: Theme.of(context).primaryColor,
+                          size: 25.0,
+                        )),
+                    pinned: true,
+                    floating: false,
+                    expandedHeight: 330.0,
+                    bottom: PreferredSize(
+                      preferredSize: Size.fromHeight(50.0),
                       child: Container(
-                        color: Theme.of(context).backgroundColor,
-                        child: TabBar(
-                          tabs: _tabItems,
-                          controller: tabController,
-                          // onTap: (i) => setState((){
-                          //   tabIndex = i;
-                          //   // tabController.index = i;
-                          // }),
-                          indicatorColor: Colors.teal[500],
-                          labelStyle: TextStyle(fontSize: 12.0),
-                          labelColor: Theme.of(context).primaryColor,
-                          unselectedLabelColor: Colors.grey[400],
+                        height: 50.0,
+                        child: Container(
+                          color: Theme.of(context).backgroundColor,
+                          child: TabBar(
+                            tabs: _tabItems,
+                            controller: tabController,
+                            // onTap: (i) => setState((){
+                            //   tabIndex = i;
+                            //   // tabController.index = i;
+                            // }),
+                            indicatorColor: Colors.teal[500],
+                            labelStyle: TextStyle(fontSize: 12.0),
+                            labelColor: Theme.of(context).primaryColor,
+                            unselectedLabelColor: Colors.grey[400],
+                          ),
                         ),
                       ),
                     ),
+                    flexibleSpace: FlexibleSpaceBar(
+                      collapseMode: CollapseMode.parallax,
+                      background: _appBarBackground(),
+                    ),
                   ),
-                  flexibleSpace: FlexibleSpaceBar(
-                    collapseMode: CollapseMode.parallax,
-                    background: _appBarBackground(),
-                  ),
-                ),
-                SliverList(
-                    delegate: SliverChildListDelegate([
-                  FutureBuilder<MovieDetails>(
-                      future: movDetails,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState != ConnectionState.done) {
-                          return Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else {
-                          if (snapshot.hasData) {
-                            return Container(
-                              height:
-                                  MediaQuery.of(context).size.height - 130.0,
-                              child: TabBarView(
-                                children: [
-                                  TabDescription(
-                                    id: widget.movie,
-                                    details: _movDet,
-                                  ),
-                                  TabTrailers(id: widget.movie),
-                                  TabReview(id: widget.movie),
-                                ],
-                                controller: tabController,
-                              ),
+                  SliverList(
+                      delegate: SliverChildListDelegate([
+                    FutureBuilder<MovieDetails>(
+                        future: movDetails,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState != ConnectionState.done) {
+                            return Center(
+                              child: CircularProgressIndicator(),
                             );
-                          } else
-                            return Text('*-> Ничего нет');
-                        }
-                      })
-                ]))
+                          } else {
+                            if (snapshot.hasData) {
+                              return Container(
+                                height:
+                                    MediaQuery.of(context).size.height - 130.0,
+                                child: TabBarView(
+                                  children: [
+                                    TabDescription(
+                                      id: widget.movie,
+                                      details: _movDet,
+                                    ),
+                                    TabTrailers(id: widget.movie),
+                                    TabReview(id: widget.movie),
+                                  ],
+                                  controller: tabController,
+                                ),
+                              );
+                            } else
+                              return Text('*-> Ничего нет');
+                          }
+                        })
+                  ]))
               ],
-            ),
+            );}
+                ),
           );
   }
 }

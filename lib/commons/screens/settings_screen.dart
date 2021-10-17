@@ -13,6 +13,8 @@ class _SettingScreenState extends State<SettingScreen> {
   bool favCheckBox = false;
   bool animCheckBox = false;
 
+  var metaData;
+
   @override
   void initState() {
     super.initState();
@@ -23,7 +25,7 @@ class _SettingScreenState extends State<SettingScreen> {
     var _prefs = await prefs;
     setState(() {
       popRadio = (_prefs.getString("POPULAR_RADIO") ?? "popular");
-      favCheckBox = (_prefs.getBool("FAV_CHECKBOX") ?? true);
+      favCheckBox = (_prefs.getBool("FAV_CHECKBOX") ?? false);
       animCheckBox = (_prefs.getBool("ANIMATION_CHECKBOX") ?? false);
     });
   }
@@ -43,9 +45,10 @@ class _SettingScreenState extends State<SettingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    metaData = ModalRoute.of(context).settings.arguments as Map;
+    popRadio = metaData['sortValue'] as String;
     return Scaffold(
       appBar: AppBar(
-        // backgroundColor:,
         title: Text('Popular Movies', style: TextStyle(color: Theme.of(context).primaryColor),),
         backgroundColor: Theme.of(context).cardColor,
         leading: GestureDetector(
@@ -65,49 +68,49 @@ class _SettingScreenState extends State<SettingScreen> {
                 "Настройки данных",
                 style: TextStyle(color: Colors.teal[400], fontSize: 16.0),
               )),
-          // ListTile(
-          //   leading: Icon(Icons.sort),
-          //   title: Text("Режим сортировки"),
-          //   subtitle: Text(popRadio == "rate" ? "По рейтингу" : "По популярности"),
-          //   onTap: () =>
-          //       showDialog(
-          //         context: context,
-          //         builder: (BuildContext context) =>
-          //             AlertDialog(
-          //               title: Text("Режим сортировки"),
-          //               content: Container(
-          //                 height: 112.0,
-          //                 child: Column(
-          //                   children: [
-          //                     RadioListTile(
-          //                       value: "popular",
-          //                       groupValue: popRadio,
-          //                       selected: popRadio == 'popular' ? true : false,
-          //                       onChanged: (newValue) {
-          //                         setState(() => popRadio = newValue);
-          //                         Navigator.pop(context, "popular");
-          //                       },
-          //                       title: Text("По популярности"),),
-          //                     RadioListTile(
-          //                       value: "rate",
-          //                       groupValue: popRadio,
-          //                       selected: popRadio != 'popular' ? true : false,
-          //                       onChanged: (newValue) {
-          //                         setState(() => popRadio = newValue);
-          //                         Navigator.pop(context, "rate");
-          //                       },
-          //                       title: Text("По рейтингу"),),
-          //                   ],
-          //                 ),
-          //               ),
-          //               actions: [
-          //                 TextButton(
-          //                     onPressed: () => Navigator.pop(context, "Отмена"),
-          //                     child: Text("Отмена"))
-          //               ],
-          //             ),
-          //       ),
-          // ),
+          ListTile(
+            leading: Icon(Icons.sort),
+            title: Text("Режим сортировки"),
+            subtitle: Text(popRadio == "rate" ? "По рейтингу" : "По популярности"),
+            onTap: () =>
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      AlertDialog(
+                        title: Text("Режим сортировки"),
+                        content: Container(
+                          height: 112.0,
+                          child: Column(
+                            children: [
+                              RadioListTile(
+                                value: "popular",
+                                groupValue: popRadio,
+                                selected: popRadio == 'popular' ? true : false,
+                                onChanged: (newValue) {
+                                  setState(() => popRadio = newValue);
+                                  Navigator.pop(context, "popular");
+                                },
+                                title: Text("По популярности"),),
+                              RadioListTile(
+                                value: "rate",
+                                groupValue: popRadio,
+                                selected: popRadio != 'popular' ? true : false,
+                                onChanged: (newValue) {
+                                  setState(() => popRadio = newValue);
+                                  Navigator.pop(context, "rate");
+                                },
+                                title: Text("По рейтингу"),),
+                            ],
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                              onPressed: () => Navigator.pop(context, "Отмена"),
+                              child: Text("Отмена"))
+                        ],
+                      ),
+                ),
+          ),
           CheckboxListTile(
             title: const Text("Любимые фильмы"),
             subtitle: favCheckBox == false

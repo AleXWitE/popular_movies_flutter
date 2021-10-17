@@ -38,14 +38,6 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  Future<Null> refreshList() async {
-    //функция обновления списка
-    await Future.delayed(Duration(milliseconds: 1000));
-    setState(() {});
-    setState(() {});
-    return null;
-  }
-
   _getPrefs() async {
     var prefs = await _prefs;
     setState(() {
@@ -68,6 +60,14 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     else
       movieItems = getTopRated(_page);
     return movieItems;
+  }
+
+  Future<Null> _refresh() {
+    movieItems = null;
+    _movPosters.clear();
+    movieItems = updatePopular(page++);
+    _addImgs(movieItems);
+    return null;
   }
 
   @override
@@ -119,6 +119,12 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+
+    _scrollController.addListener(() {
+      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent)
+        _refresh();
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -174,7 +180,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
             width: 15.0,
           ),
           GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/settings')
+            onTap: () => Navigator.pushNamed(context, '/settings', arguments: {'sortValue' : popRadio})
                 .then((value) => setState(() {
                       _getPrefs();
                       movieItems = null;
@@ -189,17 +195,45 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           ),
         ],
       ),
-      body: FutureBuilder<List<MovieItem>>(
-          future: movieItems,
-          initialData: emptyMovieItems,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              // return Center(
-              //   child: CircularProgressIndicator(),
-              // );
-              return GridView.builder(
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: FutureBuilder<List<MovieItem>>(
+            future: movieItems,
+            initialData: emptyMovieItems,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                // return Center(
+                //   child: CircularProgressIndicator(),
+                // );
+                return GridView.builder(
+                    padding: EdgeInsets.all(5.0),
+                    itemCount: emptyMovieItems.length,
+                    controller: _scrollController,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      childAspectRatio: 0.6,
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 5.0,
+                      mainAxisSpacing: 5.0,
+                    ),
+                    itemBuilder: (context, index) {
+                      return EmptyMovieGrid();
+                    });
+
+
+              } else if (snapshot.hasData) {
+                for (var item in snapshot.data)
+                  _movPosters.add(PopularMovieImgs(
+                    cachedImg: CachedNetworkImage(
+                      imageUrl: "$_imgUrl${item.imgUrl}",
+                      placeholder: (context, url) => CircularProgressIndicator(),
+                      errorWidget: (context, url, error) => Icon(Icons.error),
+                    ),
+                    id: item.movId,
+                    title: item.name,
+                  ));
+                return GridView.builder(
                   padding: EdgeInsets.all(5.0),
-                  itemCount: emptyMovieItems.length,
+                  itemCount: snapshot.data.length,
                   controller: _scrollController,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     childAspectRatio: 0.6,
@@ -208,36 +242,13 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                     mainAxisSpacing: 5.0,
                   ),
                   itemBuilder: (context, index) {
-                    return EmptyMovieGrid();
-                  });
-            } else if (snapshot.hasData) {
-              for (var item in snapshot.data)
-                _movPosters.add(PopularMovieImgs(
-                  cachedImg: CachedNetworkImage(
-                    imageUrl: "$_imgUrl${item.imgUrl}",
-                    placeholder: (context, url) => CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
-                  ),
-                  id: item.movId,
-                  title: item.name,
-                ));
-              return GridView.builder(
-                padding: EdgeInsets.all(5.0),
-                itemCount: snapshot.data.length,
-                controller: _scrollController,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  childAspectRatio: 0.6,
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 5.0,
-                  mainAxisSpacing: 5.0,
-                ),
-                itemBuilder: (context, index) {
-                  return MovieGridItem(_movPosters[index]);
-                },
-              );
-            } else
-              return Center(child: Text("Проверьте интернет соединение!"));
-          }),
+                    return MovieGridItem(_movPosters[index]);
+                  },
+                );
+              } else
+                return Center(child: Text("Проверьте интернет соединение!"));
+            }),
+      ),
     );
   }
 }
