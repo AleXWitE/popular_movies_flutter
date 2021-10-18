@@ -31,7 +31,8 @@ dependencies:
   money2: any
   carousel_slider: any
   url_launcher: any
-  moor_flutter: any
+  hive: any
+  hive_flutter: any
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -42,8 +43,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  moor_generator: any
   build_runner: any
+  hive_generator: any
+  path_provider: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

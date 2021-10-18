@@ -101,10 +101,3 @@ class MovieReviews{
     );
   }
 }
-
-class IsExpansed{
-  int id;
-  bool isExpansed;
-
-  IsExpansed({this.id, this.isExpansed});
-}

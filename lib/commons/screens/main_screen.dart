@@ -1,13 +1,17 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:popular_films/commons/api/services/modal_services.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
+import 'package:popular_films/commons/db/hive_data_models.dart';
 import 'package:popular_films/commons/screens/widgets/empty_movie_grid.dart';
 import 'package:popular_films/commons/screens/widgets/movie_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key key, this.title}) : super(key: key);
+  MainScreen({Key key, this.title}) : super(key: key);
 
   final String title;
 
@@ -17,16 +21,26 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   GlobalKey<RefreshIndicatorState> refreshKey;
+
+
   String popRadio = "popular";
-  bool favCheckbox;
+  bool favCheckbox = false;
   bool animCheckbox;
   String _imgUrl = 'https://image.tmdb.org/t/p/w200';
   ScrollController _scrollController;
+
+  // var box = Hive.openBox('movies');
+  // var _box = Hive.box('movies');
+
+  int _boxMovId;
+  String _boxMovName;
+  String _boxMovLink;
 
   int page = 1;
 
   Future<List<MovieItem>> movieItems;
   List<MovieItem> emptyMovieItems = [];
+  Future<List<MovieItem>> _boxMovieItems;
   List<PopularMovieImgs> _movPosters = [];
 
   getEmptyList() {
@@ -54,11 +68,33 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     await prefs.setBool("ANIMATION_CHECKBOX", animCheckbox);
   }
 
+  Future<List<MovieItem>> getFavs() async {
+    var box =  Hive.box<HiveMovieDetails>('movies');
+
+    for(int i = 0; i < box.length; i++){
+      _boxMovId = box.getAt(i).movId;
+      _boxMovName = box.getAt(i).movOrigTitle;
+      _boxMovLink = box.getAt(i).movPosterPath;
+      _boxMovieItems.then((value) => MovieItem(movId: _boxMovId,name: _boxMovName, imgUrl: _boxMovLink));//add(MovieItem(movId: _boxMovId,name: _boxMovName, imgUrl: _boxMovLink));
+    }
+    setState(() {
+      movieItems = null;
+      movieItems = _boxMovieItems;
+    });
+
+  }
+
   _getMovies(int _page) {
-    if (popRadio == "popular")
-      movieItems = getPopular(_page);
-    else
-      movieItems = getTopRated(_page);
+    if(favCheckbox){
+      movieItems = getFavs();
+    }else{
+      if (popRadio == "popular")
+        movieItems = getPopular(_page);
+      else
+        movieItems = getTopRated(_page);
+    }
+
+
     return movieItems;
   }
 

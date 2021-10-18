@@ -27,6 +27,7 @@ List<MovieImages> allMovieImages(String _str){
 
 List<MovieItem> pagePopularAndRated(String _str) {
   var jsonData = jsonDecode(_str);
+  // print(jsonData['page']);
   return List<MovieItem>.from(jsonData['results'].map((i) => MovieItem.fromJson(i)).toList());
 }
 

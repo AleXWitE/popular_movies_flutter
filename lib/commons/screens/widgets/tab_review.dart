@@ -3,36 +3,27 @@ import 'package:popular_films/commons/api/services/modal_services.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
 
 class TabReview extends StatefulWidget {
-  int id;
+  List<MovieReviews> movRewiew;
 
-  TabReview({this.id});
+  TabReview({this.movRewiew});
 
   @override
   _TabReviewState createState() => _TabReviewState();
 }
 
 class _TabReviewState extends State<TabReview> {
-  Future<List<MovieReviews>> movReviews;
   List<MovieReviews> _movRew;
-
-  _getReviews(int _id) async {
-    movReviews = getReviews(_id);
-    _movRew = await movReviews;
-    setState(() => _movRew);
-    return _movRew;
-  }
 
   @override
   void initState() {
     super.initState();
-    _getReviews(widget.id);
+    _movRew = widget.movRewiew;
   }
 
   @override
   void dispose() {
     super.dispose();
     _movRew.clear();
-    movReviews = null;
   }
 
   @override
