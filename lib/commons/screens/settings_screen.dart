@@ -46,7 +46,10 @@ class _SettingScreenState extends State<SettingScreen> {
   @override
   Widget build(BuildContext context) {
     metaData = ModalRoute.of(context).settings.arguments as Map;
-    popRadio = metaData['sortValue'] as String;
+    setState(() {
+      popRadio = metaData['sortValue'].toString();
+    });
+    _getPrefs();
     return Scaffold(
       appBar: AppBar(
         title: Text('Popular Movies', style: TextStyle(color: Theme.of(context).primaryColor),),
@@ -54,7 +57,9 @@ class _SettingScreenState extends State<SettingScreen> {
         leading: GestureDetector(
           onTap: () {
             _savePrefs();
-            Navigator.pop(context);
+            print(popRadio);
+            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false,);
+            // Navigator.pop(context, true);
           },
           child: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor, size: 25.0,),
         ),
@@ -63,7 +68,7 @@ class _SettingScreenState extends State<SettingScreen> {
         children: [
           Container(
               width: MediaQuery.of(context).size.width,
-              padding: const EdgeInsets.fromLTRB(70.0, 15.0, 0.0, 5.0),
+              padding:  EdgeInsets.fromLTRB(70.0, 15.0, 0.0, 5.0),
               child: Text(
                 "Настройки данных",
                 style: TextStyle(color: Colors.teal[400], fontSize: 16.0),
@@ -86,18 +91,26 @@ class _SettingScreenState extends State<SettingScreen> {
                                 value: "popular",
                                 groupValue: popRadio,
                                 selected: popRadio == 'popular' ? true : false,
-                                onChanged: (newValue) {
-                                  setState(() => popRadio = newValue);
-                                  Navigator.pop(context, "popular");
+                                onChanged: (String newValue) {
+                                  setState(() {
+                                    popRadio = newValue;
+                                  });
+                                  Navigator.pop(context, popRadio);
+                                  print(popRadio);
+
                                 },
                                 title: Text("По популярности"),),
                               RadioListTile(
                                 value: "rate",
                                 groupValue: popRadio,
                                 selected: popRadio != 'popular' ? true : false,
-                                onChanged: (newValue) {
-                                  setState(() => popRadio = newValue);
-                                  Navigator.pop(context, "rate");
+                                onChanged: (String newValue) {
+                                  setState(() {
+                                    popRadio = newValue;
+                                  });
+                                  Navigator.pop(context, popRadio);
+                                  _savePrefs();
+                                  print(popRadio);
                                 },
                                 title: Text("По рейтингу"),),
                             ],
@@ -105,7 +118,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                         actions: [
                           TextButton(
-                              onPressed: () => Navigator.pop(context, "Отмена"),
+                              onPressed: () => Navigator.pop(context),
                               child: Text("Отмена"))
                         ],
                       ),

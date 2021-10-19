@@ -2,8 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:popular_films/commons/api/services/modal_services.dart';
+import 'package:popular_films/commons/data_models/cache_manager.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
 import 'package:popular_films/commons/data_models/movie_details.dart';
 import 'package:popular_films/commons/db/hive_data_models.dart';
@@ -30,10 +30,11 @@ class _MovieScreenState extends State<MovieScreen>
   BuildContext scaffoldContext;
 
   List<CachedNetworkImage> _cachedImgs = [];
+  final myCacheManager = CacheManager();
 
   ScrollController _scrollController = ScrollController();
 
-  var _box = Hive..openBox('movie');
+  Box<HiveMovieDetails> box;
 
   final _tabItems = [
     const Tab(
@@ -102,11 +103,12 @@ class _MovieScreenState extends State<MovieScreen>
     for (var item in _movRev)
       _hiveMovRev.add(HiveMovieReviews(
           id: item.id,
-          isExpansed: item.isExpState,
+          isExpansed: item.isExpansed,
           isExpState: item.isExpState,
           fullContent: item.fullContent,
           shortContent: item.shortContent,
           author: item.author));
+
     setState(() {
       _movRev;
       _hiveMovRev;
@@ -119,7 +121,12 @@ class _MovieScreenState extends State<MovieScreen>
     _movYt = await movYoutube;
     setState(() => _movYt);
 
-    _movYt.asMap().entries.map((e) => _hiveMovYt.add(HiveMovieYoutube(ytKey: e.value.ytKey, ytName: e.value.ytName))).toList();
+    _movYt
+        .asMap()
+        .entries
+        .map((e) => _hiveMovYt.add(
+            HiveMovieYoutube(ytKey: e.value.ytKey, ytName: e.value.ytName)))
+        .toList();
     // for(var item in _movYt)
     //   _hiveMovYt.add(HiveMovieYoutube(ytKey: item.ytKey, ytName: item.ytName));
     setState(() {
@@ -129,17 +136,27 @@ class _MovieScreenState extends State<MovieScreen>
   }
 
   _addImgs(Future<List> _list) async {
-    for (var item in await _list as List<MovieImages>)
+    for (var item in await _list as List<MovieImages>) {
+      // myCacheManager
+      //     .cacheImage("$_imgUrl${item.imgUrl}")
+      //     .then((value) => _cachedImgs.add(CachedNetworkImage(
+      //           imageUrl: value,
+      //           placeholder: (context, url) => CircularProgressIndicator(),
+      //           errorWidget: (context, url, error) => Icon(Icons.error),
+      //         )));
       _cachedImgs.add(CachedNetworkImage(
         imageUrl: "$_imgUrl${item.imgUrl}",
         placeholder: (context, url) => CircularProgressIndicator(),
         errorWidget: (context, url, error) => Icon(Icons.error),
       ));
+    }
+
+    setState(() => _cachedImgs);
 
     _movImgs = await _list;
 
-    for (var i in _movImgs)
-      _hiveMovImgs.add(HiveMovieImages(imgId: i.imgId, imgUrl: i.imgUrl));
+    for (var i in _cachedImgs)
+      _hiveMovImgs.add(HiveMovieImages(imgId: _movie, imgUrl: i.imageUrl));
     setState(() {
       _cachedImgs;
       _movImgs;
@@ -148,18 +165,26 @@ class _MovieScreenState extends State<MovieScreen>
     return _cachedImgs;
   }
 
+  _saveCachedImgs() async {}
+
   _getRest() async {
     await _getDetails();
     await _getReviews();
     await _getYoutube();
     movImages = getAllImages(widget.movie);
     await _addImgs(movImages);
+    _saveCachedImgs();
     print('rest');
   }
 
+  // Future<MovieDetails> _getHiveFuture(var futureBox) async {
+  //   return futureBox;
+  // }
+
   _getHiveDetails() async {
-    var _box = await Hive.openBox<HiveMovieDetails>('movie');
-    HiveMovieDetails _dataBox = _box.getAt(_movie);
+    // var _box = await Hive.openBox<HiveMovieDetails>('movie');
+    HiveMovieDetails _dataBox = box.get(_movie);
+    // movDetails = _getHiveFuture(_dataBox);
     setState(() {
       _movDet = MovieDetails(
           id: _dataBox.id,
@@ -180,72 +205,79 @@ class _MovieScreenState extends State<MovieScreen>
           .toString()
           .substring(1, _movDet.movGenres.toString().length - 1);
     });
-    await _box.close();
+    // await box.close();
     return _movDet;
   }
 
   _getHiveReviews() async {
-    var _box = await Hive.openBox<HiveMovieDetails>('movie');
-    HiveMovieDetails _dataBox = _box.getAt(_movie);
+    // var _box = await Hive.openBox<HiveMovieDetails>('movie');
+    HiveMovieDetails _dataBox = box.get(_movie);
 
-    for (var i in _dataBox.movReviews)
+    for (var i in _dataBox.movReviews){
       _movRev.add(MovieReviews(
           id: i.id,
           isExpansed: i.isExpansed,
-          isExpState: i.isExpState,
+          isExpState: false,
           fullContent: i.fullContent,
           shortContent: i.shortContent,
           author: i.author));
 
-    await _box.close();
+      print("${i.id}, ${i.isExpansed}, ${i.author}, ${ i.isExpState}, ${i.shortContent},\n \n ${ i.fullContent},\n ");
+    }
+
+
+    // await _box.close();
 
     return _movRev;
   }
 
   _getHiveYoutube() async {
-    var _box = await Hive.openBox<HiveMovieDetails>('movie');
-    HiveMovieDetails _dataBox = _box.getAt(_movie);
+    List<HiveMovieYoutube> _dataBox = box.get(_movie).movYoutube;
 
-    for (var i in _dataBox.movYoutube)
-      _movYt.add(YoutubeVideosKeys(ytKey: i.ytKey, ytName: i.ytName));
 
-    await _box.close();
+    _dataBox.asMap().entries.map((e) => _movYt.add(YoutubeVideosKeys(ytKey: e.value.ytKey, ytName: e.value.ytName)));
+
+    // await _box.close();
     return _movYt;
   }
 
   _addHiveImgs() async {
-    var _box = await Hive.openBox<HiveMovieDetails>('movie');
-    HiveMovieDetails _dataBox = _box.getAt(_movie);
+    // var _box = await Hive.openBox<HiveMovieDetails>('movie');
+    HiveMovieDetails _dataBox = box.get(_movie);
     for (var item in _dataBox.movBackpacks)
-      _cachedImgs.add(CachedNetworkImage(
-        imageUrl: item.imgUrl,
-        placeholder: (context, url) => CircularProgressIndicator(),
-        errorWidget: (context, url, error) => Icon(Icons.error),
-      ));
-
-    await _box.close();
+      myCacheManager
+          .cacheImage("$_imgUrl${item.imgUrl}")
+          .then((value) { _cachedImgs.add(CachedNetworkImage(
+                imageUrl: value,
+                placeholder: (context, url) => CircularProgressIndicator(),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+              ));
+          });
+    setState(() => _cachedImgs);
     return _cachedImgs;
   }
+
+  // _getCachedImgs() async {}
 
   _getHive() async {
     await _getHiveDetails();
     await _getHiveReviews();
     await _getHiveYoutube();
+    // _getCachedImgs();
     await _addHiveImgs();
     print('hive');
     setState(() => _inFav = true);
   }
 
   _checkDataHive() async {
-    var _box = await Hive.openBox<HiveMovieDetails>('movies');
-    // _box
-    // print(await _box.getAt(0));
-    var _dataBox = _box.getAt(0).isInBox;
-    print(_dataBox);
-    if (_dataBox)
+    box = await Hive.openBox<HiveMovieDetails>('movies');
+    var _dataBox;
+    if (box.isNotEmpty) _dataBox = box.get(_movie);
+    if (_dataBox != null)
       _getHive();
-    else
+    else {
       _getRest();
+    }
   }
 
   @override
@@ -265,42 +297,32 @@ class _MovieScreenState extends State<MovieScreen>
   }
 
   addToFav() async {
-    var _box = await Hive.openBox<HiveMovieDetails>('movie');
-    // if(_box.length == 0) await _box.deleteFromDisk().then((value) => null);
-    // if(_box.length == 0)await _box.clear();
-
-    await _box
-        .add(
-      // _movie,
-            HiveMovieDetails(
-              movId: _movie,
-              movOrigTitle: _movDet.movOrigTitle,
-              movTagline: _movDet.movTagline,
-              movPosterPath: _cachPoster,
-              movBackpacks: _hiveMovImgs,
-              movGenres: _movDet.movGenres,
-              movVote: _movDet.movVote,
-              movRelease: _movDet.movRelease,
-              movLanguage: _movDet.movLanguage,
-              movRuntime: _movDet.movRuntime,
-              movRevenue: _movDet.movRevenue,
-              movBudget: _movDet.movBudget,
-              movHomepage: _movDet.movHomepage,
-              movOverview: _movDet.movOverview,
-              movReviews: _hiveMovRev,
-              movYoutube: _hiveMovYt,
-            ));
-        // .then((val) async => await _box.close());
+    await box.put(
+        _movie,
+        HiveMovieDetails(
+          movId: _movie,
+          movOrigTitle: _movDet.movOrigTitle,
+          movTagline: _movDet.movTagline,
+          movPosterPath: _cachPoster,
+          movBackpacks: _hiveMovImgs,
+          movGenres: _movDet.movGenres,
+          movVote: _movDet.movVote,
+          movRelease: _movDet.movRelease,
+          movLanguage: _movDet.movLanguage,
+          movRuntime: _movDet.movRuntime,
+          movRevenue: _movDet.movRevenue,
+          movBudget: _movDet.movBudget,
+          movHomepage: _movDet.movHomepage,
+          movOverview: _movDet.movOverview,
+          movReviews: _hiveMovRev,
+          movYoutube: _hiveMovYt,
+        ));
     print("add");
-    print(_box.getAt(0));
-    await _box.close();
   }
 
   delFromFav() async {
-    var _box = await Hive.openBox<HiveMovieDetails>('movie');
-    await _box.delete(_movie);
+    await box.delete(_movie);
     print("delete");
-    await _box.close();
   }
 
   @override
@@ -360,7 +382,7 @@ class _MovieScreenState extends State<MovieScreen>
               child: RichText(
                 overflow: TextOverflow.fade,
                 text: TextSpan(
-                    text: "${/*_setDateDesc(*/_movDet.movRelease/*)*/}\n",
+                    text: "${/*_setDateDesc(*/ _movDet.movRelease /*)*/}\n",
                     style: TextStyle(color: Colors.grey[500], height: 2.0),
                     children: [
                       TextSpan(
@@ -533,39 +555,38 @@ class _MovieScreenState extends State<MovieScreen>
                   ),
                   SliverList(
                       delegate: SliverChildListDelegate([
-                    FutureBuilder<MovieDetails>(
-                        future: movDetails,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState !=
-                              ConnectionState.done) {
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else {
-                            if (snapshot.hasData) {
-                              return Container(
-                                height:
-                                    MediaQuery.of(context).size.height - 130.0,
-                                child: TabBarView(
-                                  children: [
-                                    TabDescription(
-                                      id: widget.movie,
-                                      details: _movDet,
-                                    ),
-                                    TabTrailers(
-                                      getYoutube: _movYt,
-                                    ),
-                                    TabReview(
-                                      movRewiew: _movRev,
-                                    ),
-                                  ],
-                                  controller: tabController,
-                                ),
-                              );
-                            } else
-                              return Text('*-> Ничего нет');
-                          }
-                        })
+                    // FutureBuilder<MovieDetails>(
+                    //     future: movDetails,
+                    //     builder: (context, snapshot) {
+                    //       if (snapshot.connectionState !=
+                    //           ConnectionState.done) {
+                    //         return Center(
+                    //           child: CircularProgressIndicator(),
+                    //         );
+                    //       } else {
+                    //         if (snapshot.hasData) {
+                    /*return */ Container(
+                      height: MediaQuery.of(context).size.height - 130.0,
+                      child: TabBarView(
+                        children: [
+                          TabDescription(
+                            id: widget.movie,
+                            details: _movDet,
+                          ),
+                          TabTrailers(
+                            getYoutube: _movYt,
+                          ),
+                          TabReview(
+                            movRewiew: _movRev,
+                          ),
+                        ],
+                        controller: tabController,
+                      ),
+                    )
+                    //   } else
+                    //     return Text('*-> Ничего нет');
+                    // }
+                    // })
                   ]))
                 ],
               );

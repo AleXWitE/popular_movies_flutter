@@ -23,7 +23,7 @@ class _TabReviewState extends State<TabReview> {
   @override
   void dispose() {
     super.dispose();
-    _movRew.clear();
+    // _movRew.clear();
   }
 
   @override

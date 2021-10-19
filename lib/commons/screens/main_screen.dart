@@ -22,6 +22,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   GlobalKey<RefreshIndicatorState> refreshKey;
 
+  Future<Box<HiveMovieDetails>> box;
 
   String popRadio = "popular";
   bool favCheckbox = false;
@@ -29,17 +30,16 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   String _imgUrl = 'https://image.tmdb.org/t/p/w200';
   ScrollController _scrollController;
 
-  // var box = Hive.openBox('movies');
-  // var _box = Hive.box('movies');
-
   int _boxMovId;
   String _boxMovName;
   String _boxMovLink;
 
   int page = 1;
+  Curve curve = Curves.easeIn;
 
   Future<List<MovieItem>> movieItems;
   List<MovieItem> emptyMovieItems = [];
+  List<MovieItem> _movItems = [];
   Future<List<MovieItem>> _boxMovieItems;
   List<PopularMovieImgs> _movPosters = [];
 
@@ -59,6 +59,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       favCheckbox = (prefs.getBool("FAV_CHECKBOX") ?? false);
       animCheckbox = (prefs.getBool("ANIMATION_CHECKBOX") ?? false);
     });
+    _checkDataHive();
   }
 
   _savePrefs() async {
@@ -68,42 +69,96 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     await prefs.setBool("ANIMATION_CHECKBOX", animCheckbox);
   }
 
-  Future<List<MovieItem>> getFavs() async {
-    var box =  Hive.box<HiveMovieDetails>('movies');
+  // Future<List<MovieItem>> getFavs() async {
+  //   var box = await Hive.openBox<HiveMovieDetails>('movie');
+  //
+  //
+  //   Future<Box<HiveMovieDetails>> _box = Hive.openBox('movie');
+  //
+  //   for(int i = 0; i < box.length; i++){
+  //     _boxMovId = box.getAt(i).movId;
+  //     _boxMovName = box.getAt(i).movOrigTitle;
+  //     _boxMovLink = box.getAt(i).movPosterPath;
+  //     // _movItems.add(MovieItem(movId: _boxMovId,name: _boxMovName, imgUrl: _boxMovLink));
+  //     _box.then((value) => _boxMovieItems.)
+  //     await _boxMovieItems.then((value) => value.add(MovieItem(movId: _boxMovId, name: _boxMovName, imgUrl: _boxMovLink)));
+  //     // _boxMovieItems.then((value) => MovieItem(movId: _boxMovId,name: _boxMovName, imgUrl: _boxMovLink));//add(MovieItem(movId: _boxMovId,name: _boxMovName, imgUrl: _boxMovLink));
+  //   }
+  //   return _boxMovieItems;
+  //   setState(() {
+  //     movieItems = null;
+  //     movieItems = _boxMovieItems;
+  //   });
+  //
+  // }
 
-    for(int i = 0; i < box.length; i++){
-      _boxMovId = box.getAt(i).movId;
-      _boxMovName = box.getAt(i).movOrigTitle;
-      _boxMovLink = box.getAt(i).movPosterPath;
-      _boxMovieItems.then((value) => MovieItem(movId: _boxMovId,name: _boxMovName, imgUrl: _boxMovLink));//add(MovieItem(movId: _boxMovId,name: _boxMovName, imgUrl: _boxMovLink));
-    }
-    setState(() {
-      movieItems = null;
-      movieItems = _boxMovieItems;
-    });
-
-  }
-
-  _getMovies(int _page) {
-    if(favCheckbox){
-      movieItems = getFavs();
-    }else{
+  _getMovies(int _page) async {
+    // if(favCheckbox){
+    //   // movieItems = getFavs();
+    // }else{
       if (popRadio == "popular")
         movieItems = getPopular(_page);
       else
         movieItems = getTopRated(_page);
-    }
+    // }
+    _movItems = await movieItems;
+    setState(() => _movItems);
+    return movieItems;
+  }
 
+  Future<Null> _refreshBottom() async {
+        setState(() {
+          movieItems = null;
+          _movPosters.clear();
+          page++;
+          _scrollController.animateTo(0.1, duration: Duration(milliseconds: 800), curve: curve);
+        });
+
+          movieItems = _getMovies(page);
+    _addImgs(_movItems);
+    await Future.delayed(Duration(milliseconds: 500));
+        print("bottom $page");
 
     return movieItems;
   }
 
-  Future<Null> _refresh() {
-    movieItems = null;
-    _movPosters.clear();
-    movieItems = updatePopular(page++);
-    _addImgs(movieItems);
-    return null;
+  _refreshTop() async {
+    if (page == 1) {
+      movieItems = _getMovies(1);
+    }else if(page > 1) {
+      setState(() {
+        page--;
+      movieItems = null;
+        _movPosters.clear();
+      });
+      movieItems =  _getMovies(page);
+      _addImgs(_movItems);
+
+    }
+
+    print("top $page");
+
+    await Future.delayed(Duration(milliseconds: 500));
+    return movieItems;
+  }
+
+  _checkDataHive() async {
+    box = Hive.openBox<HiveMovieDetails>('movies');
+    Box<HiveMovieDetails> _box = await box;
+
+    setState(() {
+      movieItems = null;
+      _movItems.clear();
+      _movPosters.clear();
+    });
+
+    if(favCheckbox == true){
+      if (_box.isNotEmpty)
+        movieItems = null;
+    }
+    else {
+      _getMovies(page);
+    }
   }
 
   @override
@@ -111,17 +166,18 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     super.initState();
     _getPrefs();
     getEmptyList();
-    _getMovies(page);
+    // _getMovies(page);
+    _checkDataHive();
     _scrollController = ScrollController(
       initialScrollOffset: 0.0,
       keepScrollOffset: true,
     );
-    _addImgs(movieItems);
+    _addImgs(_movItems);
     WidgetsBinding.instance.addObserver(this);
   }
 
-  _addImgs(Future<List> _list) async {
-    for (var item in _list as List<MovieItem>)
+  _addImgs(List<MovieItem> _restList) {
+    for (var item in _restList)
       _movPosters.add(PopularMovieImgs(
         cachedImg: CachedNetworkImage(
           imageUrl: "$_imgUrl${item.imgUrl}",
@@ -153,13 +209,20 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
   }
 
+
   @override
   Widget build(BuildContext context) {
-
     _scrollController.addListener(() {
-      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent)
-        _refresh();
+      if(favCheckbox == false){
+        if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent)
+          _refreshBottom();
+        else if(_scrollController.position.pixels == _scrollController.position.minScrollExtent)
+          _refreshTop();
+      }
+
     });
+
+
 
     return Scaffold(
       appBar: AppBar(
@@ -182,6 +245,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                       popRadio = newValue;
                       movieItems = null;
                       _movPosters.clear();
+                      page = 1;
                       _getMovies(page);
                     });
                     Navigator.pop(context);
@@ -198,6 +262,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                       popRadio = newValue;
                       movieItems = null;
                       _movPosters.clear();
+                      page = 1;
                       _getMovies(page);
                     });
                     Navigator.pop(context);
@@ -216,13 +281,14 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
             width: 15.0,
           ),
           GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/settings', arguments: {'sortValue' : popRadio})
-                .then((value) => setState(() {
-                      _getPrefs();
-                      movieItems = null;
-                      _movPosters.clear();
-                      _getMovies(page);
-                    })),
+            onTap: () async {
+              var resultSettings = await Navigator.pushNamedAndRemoveUntil(context, '/settings', (route) => false, arguments: {'sortValue' : popRadio});
+              if(resultSettings == true)
+                setState(() {
+                  _getPrefs();
+                  _checkDataHive();
+                });
+            },
             child: Icon(
               Icons.settings,
               size: 30.0,
@@ -232,9 +298,10 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: FutureBuilder<List<MovieItem>>(
-            future: movieItems,
+        key: refreshKey,
+        onRefresh:() => _refreshTop(),
+        child: FutureBuilder(
+            future: favCheckbox == false ? movieItems : box,
             initialData: emptyMovieItems,
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
@@ -257,17 +324,29 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
 
               } else if (snapshot.hasData) {
-                for (var item in snapshot.data)
-                  _movPosters.add(PopularMovieImgs(
+                // var snapUrl = snapshot.hasData as List<HiveMovieDetails>;
+                if(favCheckbox)
+                  snapshot.data.toMap().entries.map((e) => _movPosters.add(PopularMovieImgs(
+                  cachedImg: CachedNetworkImage(
+                    imageUrl:e.value.movPosterPath,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  ),
+                  id: e.value.movId,
+                  title: e.value.movOrigTitle,
+                ))).toList();
+                else
+                  snapshot.data.asMap().entries.map((e) => _movPosters.add(PopularMovieImgs(
                     cachedImg: CachedNetworkImage(
-                      imageUrl: "$_imgUrl${item.imgUrl}",
+                      imageUrl:"$_imgUrl${e.value.imgUrl}",
                       placeholder: (context, url) => CircularProgressIndicator(),
                       errorWidget: (context, url, error) => Icon(Icons.error),
                     ),
-                    id: item.movId,
-                    title: item.name,
-                  ));
+                    id: e.value.movId,
+                    title:e.value.name,
+                  ))).toList();
                 return GridView.builder(
+                  physics: AlwaysScrollableScrollPhysics(),
                   padding: EdgeInsets.all(5.0),
                   itemCount: snapshot.data.length,
                   controller: _scrollController,
