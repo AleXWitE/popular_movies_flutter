@@ -9,7 +9,7 @@ class SettingScreen extends StatefulWidget {
 class _SettingScreenState extends State<SettingScreen> {
   final Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
-  String popRadio;
+  String popRadio = '';
   bool favCheckBox = false;
   bool animCheckBox = false;
 
@@ -45,11 +45,6 @@ class _SettingScreenState extends State<SettingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    metaData = ModalRoute.of(context).settings.arguments as Map;
-    setState(() {
-      popRadio = metaData['sortValue'].toString();
-    });
-    _getPrefs();
     return Scaffold(
       appBar: AppBar(
         title: Text('Popular Movies', style: TextStyle(color: Theme.of(context).primaryColor),),
@@ -58,8 +53,7 @@ class _SettingScreenState extends State<SettingScreen> {
           onTap: () {
             _savePrefs();
             print(popRadio);
-            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false,);
-            // Navigator.pop(context, true);
+            Navigator.pop(context, true);
           },
           child: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor, size: 25.0,),
         ),
@@ -68,7 +62,7 @@ class _SettingScreenState extends State<SettingScreen> {
         children: [
           Container(
               width: MediaQuery.of(context).size.width,
-              padding:  EdgeInsets.fromLTRB(70.0, 15.0, 0.0, 5.0),
+              padding: const EdgeInsets.fromLTRB(70.0, 15.0, 0.0, 5.0),
               child: Text(
                 "Настройки данных",
                 style: TextStyle(color: Colors.teal[400], fontSize: 16.0),
@@ -91,26 +85,19 @@ class _SettingScreenState extends State<SettingScreen> {
                                 value: "popular",
                                 groupValue: popRadio,
                                 selected: popRadio == 'popular' ? true : false,
-                                onChanged: (String newValue) {
-                                  setState(() {
-                                    popRadio = newValue;
-                                  });
-                                  Navigator.pop(context, popRadio);
-                                  print(popRadio);
-
+                                onChanged: (newValue) {
+                                  setState(() => popRadio = newValue);
+                                  Navigator.pop(context);
                                 },
                                 title: Text("По популярности"),),
                               RadioListTile(
                                 value: "rate",
                                 groupValue: popRadio,
                                 selected: popRadio != 'popular' ? true : false,
-                                onChanged: (String newValue) {
-                                  setState(() {
-                                    popRadio = newValue;
-                                  });
-                                  Navigator.pop(context, popRadio);
-                                  _savePrefs();
-                                  print(popRadio);
+                                onChanged: (newValue) {
+                                  setState(() => popRadio = newValue);
+                                  Navigator.pop(context);
+
                                 },
                                 title: Text("По рейтингу"),),
                             ],
@@ -131,7 +118,10 @@ class _SettingScreenState extends State<SettingScreen> {
                 : Text("Данные будут загружаться из локальной базы данных."),
             secondary: Icon(Icons.view_list, color: Colors.deepPurple,),
             onChanged: (bool value) {
-              setState(() => favCheckBox = value);
+              setState(() {
+                favCheckBox = value;
+              });
+              _savePrefs();
             },
             value: favCheckBox,
           ),

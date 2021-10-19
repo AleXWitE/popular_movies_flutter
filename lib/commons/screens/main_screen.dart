@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -96,10 +94,10 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     // if(favCheckbox){
     //   // movieItems = getFavs();
     // }else{
-      if (popRadio == "popular")
-        movieItems = getPopular(_page);
-      else
-        movieItems = getTopRated(_page);
+    if (popRadio == "popular")
+      movieItems = getPopular(_page);
+    else
+      movieItems = getTopRated(_page);
     // }
     _movItems = await movieItems;
     setState(() => _movItems);
@@ -107,17 +105,18 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   }
 
   Future<Null> _refreshBottom() async {
-        setState(() {
-          movieItems = null;
-          _movPosters.clear();
-          page++;
-          _scrollController.animateTo(0.1, duration: Duration(milliseconds: 800), curve: curve);
-        });
+    setState(() {
+      movieItems = null;
+      _movPosters.clear();
+      page++;
+      _scrollController.animateTo(0.1,
+          duration: Duration(milliseconds: 800), curve: curve);
+    });
 
-          movieItems = _getMovies(page);
+    movieItems = _getMovies(page);
     _addImgs(_movItems);
     await Future.delayed(Duration(milliseconds: 500));
-        print("bottom $page");
+    print("bottom $page");
 
     return movieItems;
   }
@@ -125,15 +124,14 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   _refreshTop() async {
     if (page == 1) {
       movieItems = _getMovies(1);
-    }else if(page > 1) {
+    } else if (page > 1) {
       setState(() {
         page--;
-      movieItems = null;
+        movieItems = null;
         _movPosters.clear();
       });
-      movieItems =  _getMovies(page);
+      movieItems = _getMovies(page);
       _addImgs(_movItems);
-
     }
 
     print("top $page");
@@ -152,11 +150,9 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       _movPosters.clear();
     });
 
-    if(favCheckbox == true){
-      if (_box.isNotEmpty)
-        movieItems = null;
-    }
-    else {
+    if (favCheckbox == true) {
+      if (_box.isNotEmpty) movieItems = null;
+    } else {
       _getMovies(page);
     }
   }
@@ -209,20 +205,17 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
   }
 
-
   @override
   Widget build(BuildContext context) {
     _scrollController.addListener(() {
-      if(favCheckbox == false){
-        if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent)
+      if (favCheckbox == false) {
+        if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent)
           _refreshBottom();
-        else if(_scrollController.position.pixels == _scrollController.position.minScrollExtent)
-          _refreshTop();
+        else if (_scrollController.position.pixels ==
+            _scrollController.position.minScrollExtent) _refreshTop();
       }
-
     });
-
-
 
     return Scaffold(
       appBar: AppBar(
@@ -282,12 +275,14 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           ),
           GestureDetector(
             onTap: () async {
-              var resultSettings = await Navigator.pushNamedAndRemoveUntil(context, '/settings', (route) => false, arguments: {'sortValue' : popRadio});
-              if(resultSettings == true)
-                setState(() {
-                  _getPrefs();
-                  _checkDataHive();
-                });
+              _savePrefs();
+              await Navigator.pushNamed(context, '/settings').then((value) {
+                if (value == true)
+                  setState(() {
+                    _getPrefs();
+                    _checkDataHive();
+                  });
+              });
             },
             child: Icon(
               Icons.settings,
@@ -299,7 +294,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       ),
       body: RefreshIndicator(
         key: refreshKey,
-        onRefresh:() => _refreshTop(),
+        onRefresh: () => _refreshTop(),
         child: FutureBuilder(
             future: favCheckbox == false ? movieItems : box,
             initialData: emptyMovieItems,
@@ -321,30 +316,40 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                     itemBuilder: (context, index) {
                       return EmptyMovieGrid();
                     });
-
-
               } else if (snapshot.hasData) {
                 // var snapUrl = snapshot.hasData as List<HiveMovieDetails>;
-                if(favCheckbox)
-                  snapshot.data.toMap().entries.map((e) => _movPosters.add(PopularMovieImgs(
-                  cachedImg: CachedNetworkImage(
-                    imageUrl:e.value.movPosterPath,
-                    placeholder: (context, url) => CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
-                  ),
-                  id: e.value.movId,
-                  title: e.value.movOrigTitle,
-                ))).toList();
+                if (favCheckbox)
+                  snapshot.data
+                      .toMap()
+                      .entries
+                      .map((e) => _movPosters.add(PopularMovieImgs(
+                            cachedImg: CachedNetworkImage(
+                              imageUrl: e.value.movPosterPath,
+                              placeholder: (context, url) =>
+                                  CircularProgressIndicator(),
+                              errorWidget: (context, url, error) =>
+                                  Icon(Icons.error),
+                            ),
+                            id: e.value.movId,
+                            title: e.value.movOrigTitle,
+                          )))
+                      .toList();
                 else
-                  snapshot.data.asMap().entries.map((e) => _movPosters.add(PopularMovieImgs(
-                    cachedImg: CachedNetworkImage(
-                      imageUrl:"$_imgUrl${e.value.imgUrl}",
-                      placeholder: (context, url) => CircularProgressIndicator(),
-                      errorWidget: (context, url, error) => Icon(Icons.error),
-                    ),
-                    id: e.value.movId,
-                    title:e.value.name,
-                  ))).toList();
+                  snapshot.data
+                      .asMap()
+                      .entries
+                      .map((e) => _movPosters.add(PopularMovieImgs(
+                            cachedImg: CachedNetworkImage(
+                              imageUrl: "$_imgUrl${e.value.imgUrl}",
+                              placeholder: (context, url) =>
+                                  CircularProgressIndicator(),
+                              errorWidget: (context, url, error) =>
+                                  Icon(Icons.error),
+                            ),
+                            id: e.value.movId,
+                            title: e.value.name,
+                          )))
+                      .toList();
                 return GridView.builder(
                   physics: AlwaysScrollableScrollPhysics(),
                   padding: EdgeInsets.all(5.0),
