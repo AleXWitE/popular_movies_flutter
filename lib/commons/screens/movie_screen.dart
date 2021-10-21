@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:popular_films/commons/api/services/modal_services.dart';
 import 'package:popular_films/commons/data_models/cache_manager.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
@@ -36,6 +37,8 @@ class _MovieScreenState extends State<MovieScreen>
 
   Box<HiveMovieDetails> box;
 
+  bool _isFav;
+
   final _tabItems = [
     const Tab(
       text: "ИНФОРМАЦИЯ",
@@ -53,13 +56,13 @@ class _MovieScreenState extends State<MovieScreen>
   int _movie;
   String _cachPoster;
 
-  // _setDateDesc(String _date) {
-  //   Jiffy.locale("ru");
-  //
-  //   var date = Jiffy(_date, "yyyy-mm-dd").format("dd, MMM, yyyy");
-  //   date = date.substring(4, date.length);
-  //   return date;
-  // }
+  _setDateDesc(String _date) {
+    Jiffy.locale("ru");
+
+    var date = Jiffy(_date, "yyyy-mm-dd").format("MMM, yyyy");
+    date = date.substring(4, date.length);
+    return date;
+  }
 
   bool _inFav = false;
 
@@ -77,7 +80,7 @@ class _MovieScreenState extends State<MovieScreen>
 
   Future<List<MovieImages>> movImages;
   List<MovieImages> _movImgs;
-  List<HiveMovieImages> _hiveMovImgs = [];
+  List<String> _hiveMovImgs = [];
 
   int _current = 0;
   int tabIndex;
@@ -137,18 +140,12 @@ class _MovieScreenState extends State<MovieScreen>
 
   _addImgs(Future<List> _list) async {
     for (var item in await _list as List<MovieImages>) {
-      // myCacheManager
-      //     .cacheImage("$_imgUrl${item.imgUrl}")
-      //     .then((value) => _cachedImgs.add(CachedNetworkImage(
-      //           imageUrl: value,
-      //           placeholder: (context, url) => CircularProgressIndicator(),
-      //           errorWidget: (context, url, error) => Icon(Icons.error),
-      //         )));
       _cachedImgs.add(CachedNetworkImage(
         imageUrl: "$_imgUrl${item.imgUrl}",
         placeholder: (context, url) => CircularProgressIndicator(),
         errorWidget: (context, url, error) => Icon(Icons.error),
       ));
+      _hiveMovImgs.add("$_imgUrl${item.imgUrl}");
     }
 
     setState(() => _cachedImgs);
@@ -156,7 +153,7 @@ class _MovieScreenState extends State<MovieScreen>
     _movImgs = await _list;
 
     for (var i in _cachedImgs)
-      _hiveMovImgs.add(HiveMovieImages(imgId: _movie, imgUrl: i.imageUrl));
+      _hiveMovImgs.add(i.imageUrl);
     setState(() {
       _cachedImgs;
       _movImgs;
@@ -201,6 +198,10 @@ class _MovieScreenState extends State<MovieScreen>
           movPosterPath: _dataBox.movPosterPath,
           movGenres: _dataBox.movGenres);
 
+      _hiveMovImgs = List.from(_dataBox.movBackpacks);
+
+      _hiveMovYt = List.from(_dataBox.movYoutube);
+
       _genres = _dataBox.movGenres
           .toString()
           .substring(1, _movDet.movGenres.toString().length - 1);
@@ -232,30 +233,28 @@ class _MovieScreenState extends State<MovieScreen>
   }
 
   _getHiveYoutube() async {
-    List<HiveMovieYoutube> _dataBox = box.get(_movie).movYoutube;
 
-
-    _dataBox.asMap().entries.map((e) => _movYt.add(YoutubeVideosKeys(ytKey: e.value.ytKey, ytName: e.value.ytName)));
+    _hiveMovYt.asMap().entries.map((e) => _movYt.add(YoutubeVideosKeys(ytKey: e.value.ytKey, ytName: e.value.ytName)));
 
     // await _box.close();
     return _movYt;
   }
 
-  _addHiveImgs() async {
-    // var _box = await Hive.openBox<HiveMovieDetails>('movie');
-    HiveMovieDetails _dataBox = box.get(_movie);
-    for (var item in _dataBox.movBackpacks)
-      myCacheManager
-          .cacheImage("$_imgUrl${item.imgUrl}")
-          .then((value) { _cachedImgs.add(CachedNetworkImage(
-                imageUrl: value,
-                placeholder: (context, url) => CircularProgressIndicator(),
-                errorWidget: (context, url, error) => Icon(Icons.error),
-              ));
-          });
-    setState(() => _cachedImgs);
-    return _cachedImgs;
-  }
+  // _addHiveImgs() async {
+  //   // var _box = await Hive.openBox<HiveMovieDetails>('movie');
+  //   HiveMovieDetails _dataBox = box.get(_movie);
+  //   for (var item in _dataBox.movBackpacks)
+  //     myCacheManager
+  //         .cacheImage("$_imgUrl$item")
+  //         .then((value) { _cachedImgs.add(CachedNetworkImage(
+  //               imageUrl: value,
+  //               placeholder: (context, url) => CircularProgressIndicator(),
+  //               errorWidget: (context, url, error) => Icon(Icons.error),
+  //             ));
+  //         });
+  //   setState(() => _cachedImgs);
+  //   return _cachedImgs;
+  // }
 
   // _getCachedImgs() async {}
 
@@ -264,7 +263,7 @@ class _MovieScreenState extends State<MovieScreen>
     await _getHiveReviews();
     await _getHiveYoutube();
     // _getCachedImgs();
-    await _addHiveImgs();
+    // await _addHiveImgs();
     print('hive');
     setState(() => _inFav = true);
   }
@@ -273,10 +272,12 @@ class _MovieScreenState extends State<MovieScreen>
     box = await Hive.openBox<HiveMovieDetails>('movies');
     var _dataBox;
     if (box.isNotEmpty) _dataBox = box.get(_movie);
-    if (_dataBox != null)
+    if (_dataBox != null) {
       _getHive();
-    else {
+      setState(() => _isFav = true);
+    } else {
       _getRest();
+      setState(() => _isFav = true);
     }
   }
 
@@ -348,11 +349,14 @@ class _MovieScreenState extends State<MovieScreen>
               child: _cachedImgs.length == 0
                   ? Container()
                   : CarouselSlider.builder(
-                      itemCount: _cachedImgs.length,
+                      itemCount: _isFav == false
+                          ? _cachedImgs.length
+                          : _hiveMovImgs.length,
                       carouselController: _carouselController,
                       itemBuilder: (context, index, reason) => Image(
-                        image: CachedNetworkImageProvider(
-                            _cachedImgs[index].imageUrl),
+                        image: CachedNetworkImageProvider( _isFav == false
+                            ? _cachedImgs[index].imageUrl
+                            : _hiveMovImgs[index]),
                         fit: BoxFit.fill,
                       ),
                       options: CarouselOptions(
@@ -518,7 +522,7 @@ class _MovieScreenState extends State<MovieScreen>
                           color: Theme.of(context).primaryColor),
                     ),
                     leading: GestureDetector(
-                        onTap: () => Navigator.pop(context),
+                        onTap: () => Navigator.pop(context, true),
                         child: Icon(
                           Icons.arrow_back,
                           color: Theme.of(context).primaryColor,

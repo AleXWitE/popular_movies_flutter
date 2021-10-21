@@ -292,68 +292,17 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        key: refreshKey,
-        onRefresh: () => _refreshTop(),
-        child: FutureBuilder(
-            future: favCheckbox == false ? movieItems : box,
-            initialData: emptyMovieItems,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                // return Center(
-                //   child: CircularProgressIndicator(),
-                // );
-                return GridView.builder(
-                    padding: EdgeInsets.all(5.0),
-                    itemCount: emptyMovieItems.length,
-                    controller: _scrollController,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      childAspectRatio: 0.6,
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 5.0,
-                      mainAxisSpacing: 5.0,
-                    ),
-                    itemBuilder: (context, index) {
-                      return EmptyMovieGrid();
-                    });
-              } else if (snapshot.hasData) {
-                // var snapUrl = snapshot.hasData as List<HiveMovieDetails>;
-                if (favCheckbox)
-                  snapshot.data
-                      .toMap()
-                      .entries
-                      .map((e) => _movPosters.add(PopularMovieImgs(
-                            cachedImg: CachedNetworkImage(
-                              imageUrl: e.value.movPosterPath,
-                              placeholder: (context, url) =>
-                                  CircularProgressIndicator(),
-                              errorWidget: (context, url, error) =>
-                                  Icon(Icons.error),
-                            ),
-                            id: e.value.movId,
-                            title: e.value.movOrigTitle,
-                          )))
-                      .toList();
-                else
-                  snapshot.data
-                      .asMap()
-                      .entries
-                      .map((e) => _movPosters.add(PopularMovieImgs(
-                            cachedImg: CachedNetworkImage(
-                              imageUrl: "$_imgUrl${e.value.imgUrl}",
-                              placeholder: (context, url) =>
-                                  CircularProgressIndicator(),
-                              errorWidget: (context, url, error) =>
-                                  Icon(Icons.error),
-                            ),
-                            id: e.value.movId,
-                            title: e.value.name,
-                          )))
-                      .toList();
-                return GridView.builder(
-                  physics: AlwaysScrollableScrollPhysics(),
+      body: FutureBuilder(
+          future: favCheckbox == false ? movieItems : box,
+          initialData: emptyMovieItems,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              // return Center(
+              //   child: CircularProgressIndicator(),
+              // );
+              return GridView.builder(
                   padding: EdgeInsets.all(5.0),
-                  itemCount: snapshot.data.length,
+                  itemCount: emptyMovieItems.length,
                   controller: _scrollController,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     childAspectRatio: 0.6,
@@ -362,13 +311,74 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                     mainAxisSpacing: 5.0,
                   ),
                   itemBuilder: (context, index) {
-                    return MovieGridItem(_movPosters[index]);
-                  },
-                );
-              } else
-                return Center(child: Text("Проверьте интернет соединение!"));
-            }),
-      ),
+                    return EmptyMovieGrid();
+                  });
+            } else if (snapshot.hasData) {
+              // var snapUrl = snapshot.hasData as List<HiveMovieDetails>;
+              if (favCheckbox)
+                snapshot.data
+                    .toMap()
+                    .entries
+                    .map((e) => _movPosters.add(PopularMovieImgs(
+                          cachedImg: CachedNetworkImage(
+                            imageUrl: e.value.movPosterPath,
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                          ),
+                          id: e.value.movId,
+                          title: e.value.movOrigTitle,
+                        )))
+                    .toList();
+              else
+                snapshot.data
+                    .asMap()
+                    .entries
+                    .map((e) => _movPosters.add(PopularMovieImgs(
+                          cachedImg: CachedNetworkImage(
+                            imageUrl: "$_imgUrl${e.value.imgUrl}",
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                          ),
+                          id: e.value.movId,
+                          title: e.value.name,
+                        )))
+                    .toList();
+              return GridView.builder(
+                physics: AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.all(5.0),
+                itemCount: snapshot.data.length,
+                controller: _scrollController,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  childAspectRatio: 0.6,
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 5.0,
+                  mainAxisSpacing: 5.0,
+                ),
+                itemBuilder: (context, index) {
+                  // return MovieGridItem(_movPosters[index]);
+                  return GestureDetector(
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/home/${_movPosters[index].id}', arguments: {
+                          'movieTitle': _movPosters[index].title,
+                          'moviePoster': _movPosters[index].cachedImg.imageUrl
+                        }).then((value) {
+                          if (value == true)
+                            _checkDataHive();
+                        }),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5.0),
+                      child: Image(image: CachedNetworkImageProvider(_movPosters[index].cachedImg.imageUrl), fit: BoxFit.fill,),
+                    ),
+                  );
+                },
+              );
+            } else
+              return Center(child: Text("Проверьте интернет соединение!"));
+          }),
     );
   }
 }
