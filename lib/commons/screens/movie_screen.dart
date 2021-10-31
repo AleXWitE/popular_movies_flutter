@@ -7,9 +7,11 @@ import 'package:popular_films/commons/api/services/modal_services.dart';
 import 'package:popular_films/commons/data_models/cache_manager.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
 import 'package:popular_films/commons/data_models/movie_details.dart';
+import 'package:popular_films/commons/data_models/provider_models.dart';
 import 'package:popular_films/commons/db/hive_data_models.dart';
 import 'package:popular_films/commons/db/sqflite/db_helpers.dart';
 import 'package:popular_films/commons/screens/widgets/custom_snackbar.dart';
+import 'package:provider/provider.dart';
 
 import 'widgets/tab_description.dart';
 import 'widgets/tab_review.dart';
@@ -19,9 +21,11 @@ class MovieScreen extends StatefulWidget {
   MovieScreen({
     Key key,
     this.movie,
+    this.isFav,
   }) : super(key: key);
 
   final int movie;
+  final bool isFav;
 
   @override
   _MovieScreenState createState() => _MovieScreenState();
@@ -36,9 +40,10 @@ class _MovieScreenState extends State<MovieScreen>
 
   ScrollController _scrollController = ScrollController();
 
-  Box<HiveMovieDetails> box;
+  // Box<HiveMovieDetails> box;
 
   bool _isFav;
+  bool _checkMovie;
 
   final _tabItems = [
     const Tab(
@@ -96,7 +101,7 @@ class _MovieScreenState extends State<MovieScreen>
       _movDet;
       _genres = _movDet.movGenres
           .toString()
-          .substring(1, _movDet.movGenres.toString().length - 1);
+          .substring(1, _movDet.movGenres.length - 1);
     });
     return _movDet;
   }
@@ -137,6 +142,18 @@ class _MovieScreenState extends State<MovieScreen>
       _hiveMovYt;
     });
     return _movYt;
+  }
+
+  _addDbImgs(List<MovieImages> _list) {
+    print("img count ${_list.length}");
+    for (var item in _list) {
+      _cachedImgs.add(CachedNetworkImage(
+        imageUrl: "$_imgUrl${item.imgUrl}",
+        placeholder: (context, url) => CircularProgressIndicator(),
+        errorWidget: (context, url, error) => Icon(Icons.error),
+      ));
+    }
+    print(_cachedImgs.length);
   }
 
   _addImgs(Future<List> _list) async {
@@ -181,51 +198,51 @@ class _MovieScreenState extends State<MovieScreen>
 
   _getHiveDetails() async {
     // var _box = await Hive.openBox<HiveMovieDetails>('movie');
-    HiveMovieDetails _dataBox = box.get(_movie);
+    // HiveMovieDetails _dataBox = box.get(_movie);
     // movDetails = _getHiveFuture(_dataBox);
-    setState(() {
-      _movDet = MovieDetails(
-          id: _dataBox.id,
-          movOrigTitle: _dataBox.movOrigTitle,
-          movTagline: _dataBox.movTagline,
-          movHomepage: _dataBox.movHomepage,
-          movRevenue: _dataBox.movRevenue,
-          movBudget: _dataBox.movBudget,
-          movRelease: _dataBox.movRelease,
-          movOverview: _dataBox.movOverview,
-          movRuntime: _dataBox.movRuntime,
-          movLanguage: _dataBox.movLanguage,
-          movVote: _dataBox.movVote,
-          movPosterPath: _dataBox.movPosterPath,
-          movGenres: _dataBox.movGenres);
-
-      _hiveMovImgs = List.from(_dataBox.movBackpacks);
-
-      _hiveMovYt = List.from(_dataBox.movYoutube);
-
-      _genres = _dataBox.movGenres
-          .toString()
-          .substring(1, _movDet.movGenres.toString().length - 1);
-    });
+    // setState(() {
+    //   _movDet = MovieDetails(
+    //       id: _dataBox.id,
+    //       movOrigTitle: _dataBox.movOrigTitle,
+    //       movTagline: _dataBox.movTagline,
+    //       movHomepage: _dataBox.movHomepage,
+    //       movRevenue: _dataBox.movRevenue,
+    //       movBudget: _dataBox.movBudget,
+    //       movRelease: _dataBox.movRelease,
+    //       movOverview: _dataBox.movOverview,
+    //       movRuntime: _dataBox.movRuntime,
+    //       movLanguage: _dataBox.movLanguage,
+    //       movVote: _dataBox.movVote,
+    //       movPosterPath: _dataBox.movPosterPath,
+    //       movGenres: _dataBox.movGenres);
+    //
+    //   _hiveMovImgs = List.from(_dataBox.movBackpacks);
+    //
+    //   _hiveMovYt = List.from(_dataBox.movYoutube);
+    //
+    //   _genres = _dataBox.movGenres
+    //       .toString()
+    //       .substring(1, _movDet.movGenres.toString().length - 1);
+    // });
     // await box.close();
     return _movDet;
   }
 
   _getHiveReviews() async {
     // var _box = await Hive.openBox<HiveMovieDetails>('movie');
-    HiveMovieDetails _dataBox = box.get(_movie);
+    // HiveMovieDetails _dataBox = box.get(_movie);
 
-    for (var i in _dataBox.movReviews){
-      _movRev.add(MovieReviews(
-          id: i.id,
-          isExpansed: i.isExpansed,
-          isExpState: false,
-          fullContent: i.fullContent,
-          shortContent: i.shortContent,
-          author: i.author));
-
-      print("${i.id}, ${i.isExpansed}, ${i.author}, ${ i.isExpState}, ${i.shortContent},\n \n ${ i.fullContent},\n ");
-    }
+    // for (var i in _dataBox.movReviews){
+    //   _movRev.add(MovieReviews(
+    //       id: i.id,
+    //       isExpansed: i.isExpansed,
+    //       isExpState: false,
+    //       fullContent: i.fullContent,
+    //       shortContent: i.shortContent,
+    //       author: i.author));
+    //
+    //   print("${i.id}, ${i.isExpansed}, ${i.author}, ${ i.isExpState}, ${i.shortContent},\n \n ${ i.fullContent},\n ");
+    // }
 
 
     // await _box.close();
@@ -269,26 +286,50 @@ class _MovieScreenState extends State<MovieScreen>
     setState(() => _inFav = true);
   }
 
+  _getFromDb() async {
+    _movDet = await DatabaseHelper.instance.getDetails(widget.movie);
+    print("in movie screen $_movie");
+    _movYt = await DatabaseHelper.instance.getYt(widget.movie);
+    _movRev = await DatabaseHelper.instance.getRev(widget.movie);
+    // _movImgs = await DatabaseHelper.instance.getImgs(widget.movie);
+    setState(() {
+      _genres = _movDet.movGenres;
+    });
+    _addDbImgs(await DatabaseHelper.instance.getImgs(widget.movie));
+    setState(() => _inFav = true);
+  }
+
   _checkDataHive() async {
-    box = await Hive.openBox<HiveMovieDetails>('movies');
-    var _dataBox;
-    if (box.isNotEmpty) _dataBox = box.get(_movie);
-    if (_dataBox != null) {
-      _getHive();
-      setState(() => _isFav = true);
+    // box = await Hive.openBox<HiveMovieDetails>('movies');
+    // var _dataBox;
+    // await Future.delayed(Duration(milliseconds: 10));
+    // if (box.isNotEmpty) _dataBox = box.get(_movie);
+    _checkMovie = await DatabaseHelper.instance.checkMovie(widget.movie);
+    if (_checkMovie)
+      setState(() => _inFav = true);
+    else
+      setState(() => _inFav = false);
+
+    if (_isFav) {
+      // _getHive();
+      _getFromDb();
     } else {
       _getRest();
-      setState(() => _isFav = true);
     }
   }
 
   @override
   void initState() {
     super.initState();
+
+    setState(() {
+      _isFav = widget.isFav;
+    });
+
+    print(_isFav);
     _checkDataHive();
     tabIndex = 0;
     _movie = widget.movie;
-
     print(widget.movie);
   }
 
@@ -299,7 +340,7 @@ class _MovieScreenState extends State<MovieScreen>
   }
 
   addToFav() async {
-    await DatabaseHelper.instance.insertFav(_movDet, _movRev, _movYt, _movImgs);
+    await DatabaseHelper.instance.insertFav(_movDet, _movRev, _movYt, _movImgs, _genres);
     // await box.put(
     //     _movie,
     //     HiveMovieDetails(
@@ -334,6 +375,11 @@ class _MovieScreenState extends State<MovieScreen>
     final _movMeta = ModalRoute.of(context).settings.arguments as Map;
     final _cachedPoster = _movMeta['moviePoster'] as String;
 
+    final _provider = Provider.of<ProviderModel>(context);
+    setState(() {
+      _isFav = _provider.favourite;
+    });
+
     setState(() => _cachPoster = _cachedPoster);
 
     TabController tabController =
@@ -352,14 +398,10 @@ class _MovieScreenState extends State<MovieScreen>
               child: _cachedImgs.length == 0
                   ? Container()
                   : CarouselSlider.builder(
-                      itemCount: _isFav == false
-                          ? _cachedImgs.length
-                          : _hiveMovImgs.length,
+                      itemCount: _cachedImgs.length,
                       carouselController: _carouselController,
                       itemBuilder: (context, index, reason) => Image(
-                        image: CachedNetworkImageProvider( _isFav == false
-                            ? _cachedImgs[index].imageUrl
-                            : _hiveMovImgs[index]),
+                        image: CachedNetworkImageProvider(_cachedImgs[index].imageUrl),
                         fit: BoxFit.fill,
                       ),
                       options: CarouselOptions(

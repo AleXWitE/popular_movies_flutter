@@ -10,7 +10,7 @@ class MovieDetails {
   int movRevenue;
   String movLanguage;
   double movVote;
-  List movGenres;
+  String movGenres;
   String movTagline;
 
   MovieDetails(
@@ -38,7 +38,7 @@ class MovieDetails {
       id: json['id'],
       movOrigTitle: json['original_title'],
       movPosterPath: json['poster_path'],
-      movGenres: listGenres,
+      movGenres: listGenres.toString(),
       movVote: json['vote_average'],
       movLanguage: listLang.length != 1 ? listLang.singleWhere((e) => e == "English") : listLang.first,
       movRuntime: json['runtime'],
@@ -65,7 +65,7 @@ class MovieDetails {
       "movBudget": movBudget,
       "movRevenue": movRevenue,
       "movVote": movVote,
-      "movGenres": movGenres.toString(),
+      "movGenres": movGenres,
     };
   }
 }

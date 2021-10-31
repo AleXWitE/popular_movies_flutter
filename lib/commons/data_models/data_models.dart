@@ -56,10 +56,11 @@ class YoutubeVideosKeys {
 }
 
 class MovieImages{
+  int movId;
   String imgUrl;
   int imgId;
 
-  MovieImages({this.imgId, this.imgUrl});
+  MovieImages({this.movId, this.imgId, this.imgUrl});
 
   factory MovieImages.fromJson(Map<String, dynamic> json){
     int i = 0;
@@ -71,6 +72,7 @@ class MovieImages{
 
   Map<String, dynamic> toMap() {
     return {
+      "movId": movId,
       "image_path": imgUrl,
     };
   }
@@ -95,7 +97,6 @@ class MovieReviews{
   MovieReviews({this.id, this.author, this.fullContent, this.shortContent, this.isExpansed, this.isExpState});
 
   factory MovieReviews.fromJson(Map<String, dynamic> json){
-    int i = 0;
     bool _result;
     String _fullContent;
     String _shortContent;
@@ -111,7 +112,7 @@ class MovieReviews{
     }
 
     return MovieReviews(
-      id: i++,
+
       author: json['author'],
       fullContent: _fullContent,
       shortContent: _shortContent,
