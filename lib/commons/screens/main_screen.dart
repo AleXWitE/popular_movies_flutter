@@ -5,6 +5,7 @@ import 'package:popular_films/commons/api/services/modal_services.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
 import 'package:popular_films/commons/data_models/provider_models.dart';
 import 'package:popular_films/commons/db/hive_data_models.dart';
+import 'package:popular_films/commons/db/sqflite/db_helpers.dart';
 import 'package:popular_films/commons/screens/widgets/empty_movie_grid.dart';
 import 'package:popular_films/commons/screens/widgets/movie_item.dart';
 import 'package:provider/provider.dart';
@@ -33,6 +34,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   int _boxMovId;
   String _boxMovName;
   String _boxMovLink;
+  Future<List<MovieItem>> _dbMovie;
 
   int page = 1;
   Curve curve = Curves.easeIn;
@@ -72,7 +74,6 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   // Future<List<MovieItem>> getFavs() async {
   //   var box = await Hive.openBox<HiveMovieDetails>('movie');
   //
-  //
   //   Future<Box<HiveMovieDetails>> _box = Hive.openBox('movie');
   //
   //   for(int i = 0; i < box.length; i++){
@@ -93,14 +94,14 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   // }
 
   _getMovies(int _page) async {
-    // if(favCheckbox){
-    //   // movieItems = getFavs();
-    // }else{
+    if(favCheckbox){
+      movieItems = DatabaseHelper.instance.showListMovie();
+    }else{
     if (popRadio == "popular")
       movieItems = getPopular(_page);
     else
       movieItems = getTopRated(_page);
-    // }
+    }
     _movItems = await movieItems;
     setState(() => _movItems);
     return movieItems;
@@ -145,6 +146,8 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   _checkDataHive() async {
     // box = Hive.openBox<HiveMovieDetails>('movies');
     // Box<HiveMovieDetails> _box = await box;
+    _dbMovie = DatabaseHelper.instance.showListMovie();
+
 
     setState(() {
       movieItems = null;
@@ -153,11 +156,10 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     });
 
     if (favCheckbox == true) {
-      /*if (_box.isNotEmpty) */movieItems = null;
-      // setState(() {});
-    } else {
+      if (_dbMovie != null) movieItems = null;
+    } /*else {*/
       _getMovies(page);
-    }
+    // }
   }
 
   @override
@@ -323,7 +325,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         ],
       ),
       body: FutureBuilder(
-          future: favCheckbox == false ? movieItems : box,
+          future: favCheckbox == false ? movieItems : _dbMovie,
           initialData: emptyMovieItems,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
@@ -347,18 +349,18 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
               // var snapUrl = snapshot.hasData as List<HiveMovieDetails>;
               if (favCheckbox)
                 snapshot.data
-                    .toMap()
+                    .asMap()
                     .entries
                     .map((e) => _movPosters.add(PopularMovieImgs(
                           cachedImg: CachedNetworkImage(
-                            imageUrl: e.value.movPosterPath,
+                            imageUrl: _imgUrl + e.value.imgUrl,
                             placeholder: (context, url) =>
                                 CircularProgressIndicator(),
                             errorWidget: (context, url, error) =>
                                 Icon(Icons.error),
                           ),
                           id: e.value.movId,
-                          title: e.value.movOrigTitle,
+                          title: e.value.name,
                         )))
                     .toList();
               else

@@ -160,7 +160,6 @@ class _MovieScreenState extends State<MovieScreen>
       _movImgs;
       _hiveMovImgs;
     });
-    insertFav(_movDet, _movRev, _movYt, _movImgs);
     return _cachedImgs;
   }
 
@@ -300,31 +299,33 @@ class _MovieScreenState extends State<MovieScreen>
   }
 
   addToFav() async {
-    await box.put(
-        _movie,
-        HiveMovieDetails(
-          movId: _movie,
-          movOrigTitle: _movDet.movOrigTitle,
-          movTagline: _movDet.movTagline,
-          movPosterPath: _cachPoster,
-          movBackpacks: _hiveMovImgs,
-          movGenres: _movDet.movGenres,
-          movVote: _movDet.movVote,
-          movRelease: _movDet.movRelease,
-          movLanguage: _movDet.movLanguage,
-          movRuntime: _movDet.movRuntime,
-          movRevenue: _movDet.movRevenue,
-          movBudget: _movDet.movBudget,
-          movHomepage: _movDet.movHomepage,
-          movOverview: _movDet.movOverview,
-          movReviews: _hiveMovRev,
-          movYoutube: _hiveMovYt,
-        ));
+    await DatabaseHelper.instance.insertFav(_movDet, _movRev, _movYt, _movImgs);
+    // await box.put(
+    //     _movie,
+    //     HiveMovieDetails(
+    //       movId: _movie,
+    //       movOrigTitle: _movDet.movOrigTitle,
+    //       movTagline: _movDet.movTagline,
+    //       movPosterPath: _cachPoster,
+    //       movBackpacks: _hiveMovImgs,
+    //       movGenres: _movDet.movGenres,
+    //       movVote: _movDet.movVote,
+    //       movRelease: _movDet.movRelease,
+    //       movLanguage: _movDet.movLanguage,
+    //       movRuntime: _movDet.movRuntime,
+    //       movRevenue: _movDet.movRevenue,
+    //       movBudget: _movDet.movBudget,
+    //       movHomepage: _movDet.movHomepage,
+    //       movOverview: _movDet.movOverview,
+    //       movReviews: _hiveMovRev,
+    //       movYoutube: _hiveMovYt,
+    //     ));
     print("add");
   }
 
   delFromFav() async {
-    await box.delete(_movie);
+    // await box.delete(_movie);
+    await DatabaseHelper.instance.deleteFav(_movDet.id);
     print("delete");
   }
 
@@ -447,7 +448,7 @@ class _MovieScreenState extends State<MovieScreen>
               top: 170.0,
               right: 20.0,
               child: GestureDetector(
-                onTap: () {
+                onTap: () async {
                   setState(() {
                     _inFav = !_inFav;
                   });

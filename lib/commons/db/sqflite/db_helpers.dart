@@ -21,10 +21,11 @@ class DatabaseHelper {
 
   static Database _db;
 
-  Future get db async{
+  Future db() async{
   if(_db != null) return _db;
 
   _db = await _initDb();
+
   return _db;
   }
 
@@ -61,38 +62,49 @@ class DatabaseHelper {
           ' isExpState INTEGER)');
     });
   }
-}
 
-Future initDb() async {
-  var databasesPath = await getDatabasesPath();
-  String path = join(databasesPath, 'fav_movies.db');
+  Future<List<MovieItem>> showListMovie() async{
+    final Database _db = await db();
+    final List<Map<String, dynamic>> maps = await _db.query(_table_fav_mov);
 
-  Database database = await openDatabase(path, version: 1,
-      onCreate: (Database db, int version) async {
-        await db.execute(
-            'CREATE TABLE Fav_movies (id INTEGER PRIMARY KEY, movId INTEGER, poster_path TEXT)'
-                ' movOrigTitle TEXT,'
-                ' movLanguage TEXT,'
-                ' movOverview TEXT,'
-                ' movTagline TEXT,'
-                ' movRelease TEXT,'
-                ' movHomepage TEXT,'
-                ' movRuntime INTEGER,'
-                ' movBudget INTEGER,'
-                ' movRevenue INTEGER,'
-                ' movVote REAL)');
-        await db.execute('CREATE TABLE Fav_movies_images (id INTEGER PRIMARY KEY, movId INTEGER, image_path TEXT)');
-        await db.execute('CREATE TABLE Fav_movies_youtube (id INTEGER PRIMARY KEY, movId INTEGER, youtube_path TEXT)');
-        await db.execute('CREATE TABLE Fav_movies_review (id INTEGER PRIMARY KEY,'
-            ' movId INTEGER,'
-            ' author TEXT,'
-            ' fullContent TEXT,'
-            ' shortContent TEXT,'
-            ' isExpansed INTEGER,'
-            ' isExpState INTEGER)');
-      });
-}
+    return List.generate(maps.length, (i) {
+      return MovieItem(
+        movId: maps[i]["movId"],
+        name: maps[i]["name"],
+        imgUrl: maps[i]["image_path"],
+      );
+    });
+  }
 
-Future insertFav(MovieDetails _movDet, List<MovieReviews> _movRev, List<YoutubeVideosKeys> _movYt, List<MovieImages> _movImgs) async {
+  Future insertFav(MovieDetails _movDet, List<MovieReviews> _movRev, List<YoutubeVideosKeys> _movYt, List<MovieImages> _movImgs) async {
+    final Database _db = await db();
+    final MovieItem _mov = MovieItem(movId: _movDet.id, imgUrl: _movDet.movPosterPath, name: _movDet.movOrigTitle);
+
+    await _db.insert(_table_fav_mov, _mov.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    await _db.insert(_table_fav_mov_det, _movDet.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+
+    for(int i = 0; i <= _movYt.length - 1; i++)
+      await _db.insert(_table_fav_mov_yt, _movYt[i].toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+
+    for(int i = 0; i <= _movRev.length - 1; i++)
+      await _db.insert(_table_fav_mov_rev, _movRev[i].toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+
+    for(int i = 0; i <= _movImgs.length - 1; i++)
+      await _db.insert(_table_fav_mov_imgs, _movImgs[i].toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+
+    print("insert done");
+  }
+
+  Future deleteFav(int _movId) async {
+    final Database _db = await db();
+
+    await _db.delete(_table_fav_mov, where: "movId = ?", whereArgs: [_movId]);
+    await _db.delete(_table_fav_mov_det, where: "movId = ?", whereArgs: [_movId]);
+    await _db.delete(_table_fav_mov_yt, where: "movId = ?", whereArgs: [_movId]);
+    await _db.delete(_table_fav_mov_rev, where: "movId = ?", whereArgs: [_movId]);
+    await _db.delete(_table_fav_mov_imgs, where: "movId = ?", whereArgs: [_movId]);
+
+    print("delete done");
+  }
 
 }

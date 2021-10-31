@@ -20,6 +20,7 @@ class MyApp extends StatelessWidget {
         backgroundColor: Colors.blueGrey[700],
       ),
       initialRoute: '/home',
+      debugShowCheckedModeBanner: false,
       routes: {
         '/home': (BuildContext context) =>
             MainScreen(title: 'Popular movies'),
