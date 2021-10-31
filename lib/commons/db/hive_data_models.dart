@@ -74,7 +74,7 @@ class HiveMovieDetails extends HiveObject{
   List<HiveMovieYoutube> movYoutube;
 
   @HiveField(16)
-  List<HiveMovieImages> movBackpacks;
+  List<String> movBackpacks;
 
   @HiveField(17)
   bool movIsFav;

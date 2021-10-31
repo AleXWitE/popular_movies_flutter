@@ -30,7 +30,7 @@ class HiveMovieDetailsAdapter extends TypeAdapter<HiveMovieDetails> {
       movRevenue: fields[10] as int,
       movHomepage: fields[7] as String,
       movTagline: fields[5] as String,
-      movBackpacks: (fields[16] as List)?.cast<HiveMovieImages>(),
+      movBackpacks: (fields[16] as List)?.cast<String>(),
       movYoutube: (fields[15] as List)?.cast<HiveMovieYoutube>(),
       movReviews: (fields[14] as List)?.cast<HiveMovieReviews>(),
       movId: fields[13] as int,
