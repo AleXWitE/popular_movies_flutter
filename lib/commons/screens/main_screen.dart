@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:popular_films/commons/api/services/modal_services.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
+import 'package:popular_films/commons/data_models/provider_models.dart';
 import 'package:popular_films/commons/db/hive_data_models.dart';
 import 'package:popular_films/commons/screens/widgets/empty_movie_grid.dart';
 import 'package:popular_films/commons/screens/widgets/movie_item.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatefulWidget {
@@ -141,8 +143,8 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   }
 
   _checkDataHive() async {
-    box = Hive.openBox<HiveMovieDetails>('movies');
-    Box<HiveMovieDetails> _box = await box;
+    // box = Hive.openBox<HiveMovieDetails>('movies');
+    // Box<HiveMovieDetails> _box = await box;
 
     setState(() {
       movieItems = null;
@@ -151,7 +153,8 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     });
 
     if (favCheckbox == true) {
-      if (_box.isNotEmpty) movieItems = null;
+      /*if (_box.isNotEmpty) */movieItems = null;
+      // setState(() {});
     } else {
       _getMovies(page);
     }
@@ -162,7 +165,6 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     super.initState();
     _getPrefs();
     getEmptyList();
-    // _getMovies(page);
     _checkDataHive();
     _scrollController = ScrollController(
       initialScrollOffset: 0.0,
@@ -202,6 +204,10 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     super.dispose();
+    setState(() {
+      movieItems = null;
+      _movPosters.clear();
+    });
     WidgetsBinding.instance.removeObserver(this);
   }
 
@@ -216,6 +222,36 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
             _scrollController.position.minScrollExtent) _refreshTop();
       }
     });
+
+    final _provider = Provider.of<ProviderModel>(context);
+    final _provFav = _provider.favourite;
+    final _provPopular = _provider.popular;
+
+    setState(() {
+      popRadio = _provPopular;
+      favCheckbox = _provFav;
+    });
+
+    updateProvider(){
+      switch(popRadio){
+        case "popular":
+          setState(() {
+            _provider.changePopular("popular");
+          });
+          break;
+        case "rate":
+          setState(() {
+            _provider.changePopular("rate");
+          });
+          break;
+      }
+      setState(() {
+        movieItems = null;
+        _movPosters.clear();
+        page = 1;
+        _getMovies(page);
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -236,10 +272,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                   onChanged: (newValue) {
                     setState(() {
                       popRadio = newValue;
-                      movieItems = null;
-                      _movPosters.clear();
-                      page = 1;
-                      _getMovies(page);
+                      updateProvider();
                     });
                     Navigator.pop(context);
                   },
@@ -253,10 +286,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                   onChanged: (newValue) {
                     setState(() {
                       popRadio = newValue;
-                      movieItems = null;
-                      _movPosters.clear();
-                      page = 1;
-                      _getMovies(page);
+                      updateProvider();
                     });
                     Navigator.pop(context);
                   },
@@ -279,7 +309,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
               await Navigator.pushNamed(context, '/settings').then((value) {
                 if (value == true)
                   setState(() {
-                    _getPrefs();
+                    // _getPrefs();
                     _checkDataHive();
                   });
               });
@@ -292,68 +322,17 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        key: refreshKey,
-        onRefresh: () => _refreshTop(),
-        child: FutureBuilder(
-            future: favCheckbox == false ? movieItems : box,
-            initialData: emptyMovieItems,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                // return Center(
-                //   child: CircularProgressIndicator(),
-                // );
-                return GridView.builder(
-                    padding: EdgeInsets.all(5.0),
-                    itemCount: emptyMovieItems.length,
-                    controller: _scrollController,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      childAspectRatio: 0.6,
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 5.0,
-                      mainAxisSpacing: 5.0,
-                    ),
-                    itemBuilder: (context, index) {
-                      return EmptyMovieGrid();
-                    });
-              } else if (snapshot.hasData) {
-                // var snapUrl = snapshot.hasData as List<HiveMovieDetails>;
-                if (favCheckbox)
-                  snapshot.data
-                      .toMap()
-                      .entries
-                      .map((e) => _movPosters.add(PopularMovieImgs(
-                            cachedImg: CachedNetworkImage(
-                              imageUrl: e.value.movPosterPath,
-                              placeholder: (context, url) =>
-                                  CircularProgressIndicator(),
-                              errorWidget: (context, url, error) =>
-                                  Icon(Icons.error),
-                            ),
-                            id: e.value.movId,
-                            title: e.value.movOrigTitle,
-                          )))
-                      .toList();
-                else
-                  snapshot.data
-                      .asMap()
-                      .entries
-                      .map((e) => _movPosters.add(PopularMovieImgs(
-                            cachedImg: CachedNetworkImage(
-                              imageUrl: "$_imgUrl${e.value.imgUrl}",
-                              placeholder: (context, url) =>
-                                  CircularProgressIndicator(),
-                              errorWidget: (context, url, error) =>
-                                  Icon(Icons.error),
-                            ),
-                            id: e.value.movId,
-                            title: e.value.name,
-                          )))
-                      .toList();
-                return GridView.builder(
-                  physics: AlwaysScrollableScrollPhysics(),
+      body: FutureBuilder(
+          future: favCheckbox == false ? movieItems : box,
+          initialData: emptyMovieItems,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              // return Center(
+              //   child: CircularProgressIndicator(),
+              // );
+              return GridView.builder(
                   padding: EdgeInsets.all(5.0),
-                  itemCount: snapshot.data.length,
+                  itemCount: emptyMovieItems.length,
                   controller: _scrollController,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     childAspectRatio: 0.6,
@@ -362,13 +341,60 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                     mainAxisSpacing: 5.0,
                   ),
                   itemBuilder: (context, index) {
-                    return MovieGridItem(_movPosters[index]);
-                  },
-                );
-              } else
-                return Center(child: Text("Проверьте интернет соединение!"));
-            }),
-      ),
+                    return EmptyMovieGrid();
+                  });
+            } else if (snapshot.hasData) {
+              // var snapUrl = snapshot.hasData as List<HiveMovieDetails>;
+              if (favCheckbox)
+                snapshot.data
+                    .toMap()
+                    .entries
+                    .map((e) => _movPosters.add(PopularMovieImgs(
+                          cachedImg: CachedNetworkImage(
+                            imageUrl: e.value.movPosterPath,
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                          ),
+                          id: e.value.movId,
+                          title: e.value.movOrigTitle,
+                        )))
+                    .toList();
+              else
+                snapshot.data
+                    .asMap()
+                    .entries
+                    .map((e) => _movPosters.add(PopularMovieImgs(
+                          cachedImg: CachedNetworkImage(
+                            imageUrl: "$_imgUrl${e.value.imgUrl}",
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                          ),
+                          id: e.value.movId,
+                          title: e.value.name,
+                        )))
+                    .toList();
+              return GridView.builder(
+                physics: AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.all(5.0),
+                itemCount: snapshot.data.length,
+                controller: _scrollController,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  childAspectRatio: 0.6,
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 5.0,
+                  mainAxisSpacing: 5.0,
+                ),
+                itemBuilder: (context, index) {
+                  return MovieGridItem(_movPosters[index]);
+                },
+              );
+            } else
+              return Center(child: Text("Проверьте интернет соединение!"));
+          }),
     );
   }
 }

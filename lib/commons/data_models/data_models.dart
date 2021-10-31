@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
 
 class MovieList {
   final List<MovieItem> movies;
@@ -26,6 +25,14 @@ class MovieItem {
       imgUrl: json['poster_path'],
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "movId": movId,
+      "name": name,
+      "image_path": imgUrl,
+    };
+  }
 }
 
 class YoutubeVideosKeys {
@@ -39,6 +46,12 @@ class YoutubeVideosKeys {
       ytKey:json['key'],
       ytName:json['name'],
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "youtube_path": ytKey,
+    };
   }
 }
 
@@ -54,6 +67,12 @@ class MovieImages{
       imgUrl: json['file_path'],
       imgId: i++,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "image_path": imgUrl,
+    };
   }
 }
 
@@ -99,5 +118,16 @@ class MovieReviews{
       isExpansed: _result,
       isExpState: false,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "movId": id,
+      "author": author,
+      "fullContent": fullContent,
+      "shortContent": shortContent,
+      "isExpansed": isExpansed == true ? 1 : 0,
+      "isExpState": isExpState == true ? 1 : 0,
+    };
   }
 }

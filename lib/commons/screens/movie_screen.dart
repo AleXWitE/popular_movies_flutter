@@ -7,6 +7,7 @@ import 'package:popular_films/commons/data_models/cache_manager.dart';
 import 'package:popular_films/commons/data_models/data_models.dart';
 import 'package:popular_films/commons/data_models/movie_details.dart';
 import 'package:popular_films/commons/db/hive_data_models.dart';
+import 'package:popular_films/commons/db/sqflite/db_helpers.dart';
 import 'package:popular_films/commons/screens/widgets/custom_snackbar.dart';
 
 import 'widgets/tab_description.dart';
@@ -162,6 +163,7 @@ class _MovieScreenState extends State<MovieScreen>
       _movImgs;
       _hiveMovImgs;
     });
+    insertFav(_movDet, _movRev, _movYt, _movImgs);
     return _cachedImgs;
   }
 

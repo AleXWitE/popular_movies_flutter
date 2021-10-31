@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:popular_films/commons/data_models/provider_models.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingScreen extends StatefulWidget {
@@ -18,7 +20,7 @@ class _SettingScreenState extends State<SettingScreen> {
   @override
   void initState() {
     super.initState();
-    _getPrefs();
+    // _getPrefs();
   }
 
   _getPrefs() async {
@@ -45,14 +47,45 @@ class _SettingScreenState extends State<SettingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final _provider = Provider.of<ProviderModel>(context);
+    final _provFav = _provider.favourite;
+    final _provPopular = _provider.popular;
+    final _provAnimation = _provider.animation;
+
+    setState(() {
+      popRadio = _provPopular;
+      favCheckBox = _provFav;
+      animCheckBox = _provAnimation;
+    });
+
+    updateFav(){
+      _provider.changeFav(favCheckBox);
+    }
+
+    updateAnim(){
+      _provider.changeAnimation(animCheckBox);
+    }
+
+    updateProvider(){
+      switch(popRadio){
+        case "popular":
+          _provider.changePopular("popular");
+          break;
+        case "rate":
+          _provider.changePopular("rate");
+          break;
+      }
+      updateFav();
+      updateAnim();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Popular Movies', style: TextStyle(color: Theme.of(context).primaryColor),),
         backgroundColor: Theme.of(context).cardColor,
         leading: GestureDetector(
           onTap: () {
-            _savePrefs();
-            print(popRadio);
+            updateProvider();
             Navigator.pop(context, true);
           },
           child: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor, size: 25.0,),
@@ -86,7 +119,10 @@ class _SettingScreenState extends State<SettingScreen> {
                                 groupValue: popRadio,
                                 selected: popRadio == 'popular' ? true : false,
                                 onChanged: (newValue) {
-                                  setState(() => popRadio = newValue);
+                                  setState(() {
+                                    popRadio = newValue;
+                                  });
+                                  updateProvider();
                                   Navigator.pop(context);
                                 },
                                 title: Text("По популярности"),),
@@ -95,9 +131,11 @@ class _SettingScreenState extends State<SettingScreen> {
                                 groupValue: popRadio,
                                 selected: popRadio != 'popular' ? true : false,
                                 onChanged: (newValue) {
-                                  setState(() => popRadio = newValue);
+                                  setState(() {
+                                    popRadio = newValue;
+                                  });
+                                  updateProvider();
                                   Navigator.pop(context);
-
                                 },
                                 title: Text("По рейтингу"),),
                             ],
@@ -121,7 +159,7 @@ class _SettingScreenState extends State<SettingScreen> {
               setState(() {
                 favCheckBox = value;
               });
-              _savePrefs();
+              updateFav();
             },
             value: favCheckBox,
           ),
@@ -148,6 +186,7 @@ class _SettingScreenState extends State<SettingScreen> {
             secondary: Icon(Icons.wb_sunny, color: Colors.deepOrange,),
             onChanged: (bool value) {
               setState(() => animCheckBox = value);
+              updateAnim();
             },
             value: animCheckBox,
           ),

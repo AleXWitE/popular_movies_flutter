@@ -50,4 +50,22 @@ class MovieDetails {
       movTagline: json['tagline'],
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "movId": id,
+      "poster_path": movPosterPath,
+      "movOrigTitle": movOrigTitle,
+      "movLanguage": movLanguage,
+      "movOverview": movOverview,
+      "movTagline": movTagline,
+      "movRelease": movRelease,
+      "movHomepage": movHomepage,
+      "movRuntime": movRuntime,
+      "movBudget": movBudget,
+      "movRevenue": movRevenue,
+      "movVote": movVote,
+      "movGenres": movGenres.toString(),
+    };
+  }
 }
