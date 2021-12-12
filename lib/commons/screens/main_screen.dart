@@ -31,10 +31,12 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   String _imgUrl = 'https://image.tmdb.org/t/p/w200';
   ScrollController _scrollController;
 
-  int _boxMovId;
-  String _boxMovName;
-  String _boxMovLink;
+  // int _boxMovId;
+  // String _boxMovName;
+  // String _boxMovLink;
   Future<List<MovieItem>> _dbMovie;
+  int _countDb;
+
 
   int page = 1;
   Curve curve = Curves.easeIn;
@@ -147,7 +149,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     // box = Hive.openBox<HiveMovieDetails>('movies');
     // Box<HiveMovieDetails> _box = await box;
     _dbMovie = DatabaseHelper.instance.showListMovie();
-
+    _countDb = await _dbMovie.asStream().length;
 
     setState(() {
       movieItems = null;
@@ -168,6 +170,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     _getPrefs();
     getEmptyList();
     _checkDataHive();
+
     _scrollController = ScrollController(
       initialScrollOffset: 0.0,
       keepScrollOffset: true,
@@ -254,6 +257,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         _getMovies(page);
       });
     }
+
 
     return Scaffold(
       appBar: AppBar(

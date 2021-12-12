@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ProviderModel extends ChangeNotifier{
+
   bool favourite = false;
   String popular = "popular";
   bool animation = false;

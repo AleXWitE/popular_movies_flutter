@@ -413,11 +413,10 @@ class _MovieScreenState extends State<MovieScreen>
     // setState(() => tabController.index = tabIndex);
 
     _appBarBackground() {
-      return Stack(
-        overflow: Overflow.visible,
-        children: [
-          Column(
-              // key: _appBarKey,
+      // return Stack(
+      //   overflow: Overflow.visible,
+      //   children: [
+          return Column(
               children: [
             Container(
               // height: /*Platform.isIOS ? 235.0 : */200.0,
@@ -449,104 +448,110 @@ class _MovieScreenState extends State<MovieScreen>
             Container(
               color: Theme.of(context).cardColor,
               height: 125.0,
-            )
-          ]),
-          Positioned(
-            right: 10.0,
-            top:/* Platform.isIOS ? 210.0 : */200.0,
-            child: Container(
-              // color: Colors.white,
-              width: MediaQuery.of(context).size.width / 2,
-              height: 125.0,
-              child: RichText(
-                overflow: TextOverflow.fade,
-                text: TextSpan(
-                    text: "${/*_setDateDesc(*/ _movDet.movRelease /*)*/}\n",
-                    style: TextStyle(color: Colors.grey[500], height: 2.0),
-                    children: [
-                      TextSpan(
-                        text: _movDet.movOrigTitle.length < 17
-                            ? "${_movDet.movOrigTitle}\n"
-                            : "${_movDet.movOrigTitle.substring(0, 15)}...\n",
-                        style: TextStyle(
-                            color: Colors.white, fontSize: 16.0, height: 1.2),
+              child: Stack(
+                overflow: Overflow.visible,
+                children: [
+                  Positioned(
+                    right: 10.0,
+                    top:/* Platform.isIOS ? 210.0 : */0.0,
+                    child: Container(
+                      // color: Colors.white,
+                      width: MediaQuery.of(context).size.width / 2,
+                      height: 125.0,
+                      child: RichText(
+                        overflow: TextOverflow.fade,
+                        text: TextSpan(
+                            text: "${/*_setDateDesc(*/ _movDet.movRelease /*)*/}\n",
+                            style: TextStyle(color: Colors.grey[500], height: 1.8),
+                            children: [
+                              TextSpan(
+                                text: _movDet.movOrigTitle.length < 17
+                                    ? "${_movDet.movOrigTitle}\n"
+                                    : "${_movDet.movOrigTitle.substring(0, 15)}...\n",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16.0, height: 1.2),
+                              ),
+                              TextSpan(
+                                text: _movDet.movTagline != ''
+                                    ? _movDet.movTagline.length > 27
+                                    ? "${_movDet.movTagline.substring(0, 25)}...\n"
+                                    : "${_movDet.movTagline}...\n"
+                                    : "\n",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 13.0, height: 1.5),
+                              ),
+                              // TextSpan(text: "\n", style: TextStyle(fontSize: 5.0, height: 2.0)),
+                              TextSpan(
+                                text: "$_genres",
+                                style: TextStyle(color: Colors.grey[500], height: 1.15),
+                              )
+                            ]),
                       ),
-                      TextSpan(
-                        text: _movDet.movTagline != ''
-                            ? _movDet.movTagline.length > 27
-                                ? "${_movDet.movTagline.substring(0, 25)}...\n"
-                                : "${_movDet.movTagline}...\n"
-                            : "\n",
-                        style: TextStyle(
-                            color: Colors.white, fontSize: 13.0, height: 1.6),
-                      ),
-                      // TextSpan(text: "\n", style: TextStyle(fontSize: 5.0, height: 2.0)),
-                      TextSpan(
-                        text: "$_genres",
-                        style: TextStyle(color: Colors.grey[500], height: 1.2),
-                      )
-                    ]),
+                    ),
+                  ),
+                  Positioned(
+                    width: MediaQuery.of(context).size.width,
+                    top: /*Platform.isIOS ? 20.0 : */-150.0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: _cachedImgs.asMap().entries.map((e) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color:
+                            _current == e.key ? Colors.teal[400] : Colors.grey[500],
+                          ),
+                          width: _current == e.key ? 10.0 : 5.0,
+                          height: _current == e.key ? 10.0 : 5.0,
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  Positioned(
+                      left: 20.0,
+                      top: /*Platform.isIOS ? 110.0 : */-100.0,
+                      child: Image(
+                        image: CachedNetworkImageProvider(_cachedPoster),
+                        width: 140.0,
+                        height: 200.0,
+                        fit: BoxFit.fill,
+                      )),
+                  Positioned(
+                      top: /*Platform.isIOS ? 180.0 : */-30.0,
+                      right: 20.0,
+                      child: GestureDetector(
+                        onTap: () async {
+                          setState(() {
+                            _inFav = !_inFav;
+                          });
+                          if (_inFav)
+                            addToFav();
+                          else
+                            delFromFav();
+                          Scaffold.of(scaffoldContext)
+                              .showSnackBar(customSnackBar(_inFav));
+                        },
+                        child: Container(
+                          width: 60.0,
+                          height: 60.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30.0),
+                            color: Colors.teal[500],
+                          ),
+                          child: Icon(
+                            _inFav == true ? Icons.favorite : Icons.favorite_border,
+                            color: _inFav == true ? Colors.red[600] : Colors.grey[500],
+                            size: 25.0,
+                          ),
+                        ),
+                      )),
+                ],
               ),
-            ),
-          ),
-          Positioned(
-            width: MediaQuery.of(context).size.width,
-            top: /*Platform.isIOS ? 20.0 : */50.0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: _cachedImgs.asMap().entries.map((e) {
-                return Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5.0),
-                    color:
-                        _current == e.key ? Colors.teal[400] : Colors.grey[500],
-                  ),
-                  width: _current == e.key ? 10.0 : 5.0,
-                  height: _current == e.key ? 10.0 : 5.0,
-                );
-              }).toList(),
-            ),
-          ),
-          Positioned(
-              left: 20.0,
-              top: /*Platform.isIOS ? 110.0 : */100.0,
-              child: Image(
-                image: CachedNetworkImageProvider(_cachedPoster),
-                width: 140.0,
-                height: 200.0,
-                fit: BoxFit.fill,
-              )),
-          Positioned(
-              top: /*Platform.isIOS ? 180.0 : */170.0,
-              right: 20.0,
-              child: GestureDetector(
-                onTap: () async {
-                  setState(() {
-                    _inFav = !_inFav;
-                  });
-                  if (_inFav)
-                    addToFav();
-                  else
-                    delFromFav();
-                  Scaffold.of(scaffoldContext)
-                      .showSnackBar(customSnackBar(_inFav));
-                },
-                child: Container(
-                  width: 60.0,
-                  height: 60.0,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30.0),
-                    color: Colors.teal[500],
-                  ),
-                  child: Icon(
-                    _inFav == true ? Icons.favorite : Icons.favorite_border,
-                    color: _inFav == true ? Colors.red[600] : Colors.grey[500],
-                    size: 25.0,
-                  ),
-                ),
-              )),
-        ],
-      );
+            )
+          ]);//,
+
+      //   ],
+      // );
     }
 
     Widget _scaffoldStructure = CustomScrollView(
@@ -606,7 +611,7 @@ class _MovieScreenState extends State<MovieScreen>
                           )),
                       pinned: true,
                       floating: false,
-                      expandedHeight:/* Platform.isIOS ? 360.0 :*/ 380.0,
+                      expandedHeight:/* Platform.isIOS ? 360.0 :*/ 370.0,
                       bottom: PreferredSize(
                         preferredSize: Size.fromHeight(50.0),
                         child: Container(
