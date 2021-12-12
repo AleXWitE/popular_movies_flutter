@@ -35,8 +35,8 @@ class MovieScreen extends StatefulWidget {
 class _MovieScreenState extends State<MovieScreen>
     with TickerProviderStateMixin {
   BuildContext scaffoldContext;
-  final GlobalKey _appBarKey = GlobalKey();
-  final GlobalKey _sliderKey = GlobalKey();
+  // final GlobalKey _appBarKey = GlobalKey();
+  // final GlobalKey _sliderKey = GlobalKey();
 
   Size appBarSize;
   Size sliderSize;
@@ -417,10 +417,10 @@ class _MovieScreenState extends State<MovieScreen>
         overflow: Overflow.visible,
         children: [
           Column(
-              key: _appBarKey,
+              // key: _appBarKey,
               children: [
             Container(
-              height: Platform.isIOS ? 211.0 : 200.0,
+              // height: /*Platform.isIOS ? 235.0 : */200.0,
               color: Theme.of(context).cardColor,
               width: MediaQuery.of(context).size.width,
               child: _cachedImgs.length == 0
@@ -429,7 +429,8 @@ class _MovieScreenState extends State<MovieScreen>
                       itemCount: _cachedImgs.length,
                       carouselController: _carouselController,
                       itemBuilder: (context, index, reason) => Image(
-                        key: _sliderKey,
+                        height: 200.0,
+                        // key: _sliderKey,
                         image: CachedNetworkImageProvider(_cachedImgs[index].imageUrl),
                         fit: BoxFit.fill,
                       ),
@@ -452,7 +453,7 @@ class _MovieScreenState extends State<MovieScreen>
           ]),
           Positioned(
             right: 10.0,
-            top: Platform.isIOS ? 210.0 : 200.0,
+            top:/* Platform.isIOS ? 210.0 : */200.0,
             child: Container(
               // color: Colors.white,
               width: MediaQuery.of(context).size.width / 2,
@@ -490,7 +491,7 @@ class _MovieScreenState extends State<MovieScreen>
           ),
           Positioned(
             width: MediaQuery.of(context).size.width,
-            top: Platform.isIOS ? 20.0 : 40.0,
+            top: /*Platform.isIOS ? 20.0 : */50.0,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: _cachedImgs.asMap().entries.map((e) {
@@ -508,7 +509,7 @@ class _MovieScreenState extends State<MovieScreen>
           ),
           Positioned(
               left: 20.0,
-              top: Platform.isIOS ? 110.0 : 100.0,
+              top: /*Platform.isIOS ? 110.0 : */100.0,
               child: Image(
                 image: CachedNetworkImageProvider(_cachedPoster),
                 width: 140.0,
@@ -516,7 +517,7 @@ class _MovieScreenState extends State<MovieScreen>
                 fit: BoxFit.fill,
               )),
           Positioned(
-              top: Platform.isIOS ? 180.0 : 170.0,
+              top: /*Platform.isIOS ? 180.0 : */170.0,
               right: 20.0,
               child: GestureDetector(
                 onTap: () async {
@@ -564,7 +565,7 @@ class _MovieScreenState extends State<MovieScreen>
                 color: Theme.of(context).primaryColor,
                 size: 25.0,
               )),
-          expandedHeight: Platform.isIOS ? 320.0 : 290.0,
+          expandedHeight: /*Platform.isIOS ? 320.0 :*/ 290.0,
         ),
         SliverList(
             delegate: SliverChildListDelegate([
@@ -579,96 +580,98 @@ class _MovieScreenState extends State<MovieScreen>
       ],
     );
 
-    return Scaffold(
-      body: _movDet == null
-          ? _scaffoldStructure
-          : Builder(builder: (BuildContext context) {
-              scaffoldContext = context;
-              return CustomScrollView(
-                controller: _scrollController,
-                slivers: [
-                  SliverAppBar(
-                    backgroundColor: Theme.of(context).cardColor,
-                    title: Text(
-                      _movMeta['movieTitle'],
-                      style: TextStyle(
-                          fontSize: 18.0,
-                          color: Theme.of(context).primaryColor),
-                    ),
-                    leading: GestureDetector(
-                        onTap: () => Navigator.pop(context, true),
-                        child: Icon(
-                          Icons.arrow_back,
-                          color: Theme.of(context).primaryColor,
-                          size: 25.0,
-                        )),
-                    pinned: true,
-                    floating: false,
-                    expandedHeight: Platform.isIOS ? 360.0 : 330.0,
-                    bottom: PreferredSize(
-                      preferredSize: Size.fromHeight(50.0),
-                      child: Container(
-                        height: 50.0,
+    return SafeArea(
+      child: Scaffold(
+        body: _movDet == null
+            ? _scaffoldStructure
+            : Builder(builder: (BuildContext context) {
+                scaffoldContext = context;
+                return CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                    SliverAppBar(
+                      backgroundColor: Theme.of(context).cardColor,
+                      title: Text(
+                        _movMeta['movieTitle'],
+                        style: TextStyle(
+                            fontSize: 18.0,
+                            color: Theme.of(context).primaryColor),
+                      ),
+                      leading: GestureDetector(
+                          onTap: () => Navigator.pop(context, true),
+                          child: Icon(
+                            Icons.arrow_back,
+                            color: Theme.of(context).primaryColor,
+                            size: 25.0,
+                          )),
+                      pinned: true,
+                      floating: false,
+                      expandedHeight:/* Platform.isIOS ? 360.0 :*/ 380.0,
+                      bottom: PreferredSize(
+                        preferredSize: Size.fromHeight(50.0),
                         child: Container(
-                          color: Theme.of(context).backgroundColor,
-                          child: TabBar(
-                            tabs: _tabItems,
-                            controller: tabController,
-                            // onTap: (i) => setState((){
-                            //   tabIndex = i;
-                            //   // tabController.index = i;
-                            // }),
-                            indicatorColor: Colors.teal[500],
-                            labelStyle: TextStyle(fontSize: 12.0),
-                            labelColor: Theme.of(context).primaryColor,
-                            unselectedLabelColor: Colors.grey[400],
+                          height: 50.0,
+                          child: Container(
+                            color: Theme.of(context).backgroundColor,
+                            child: TabBar(
+                              tabs: _tabItems,
+                              controller: tabController,
+                              // onTap: (i) => setState((){
+                              //   tabIndex = i;
+                              //   // tabController.index = i;
+                              // }),
+                              indicatorColor: Colors.teal[500],
+                              labelStyle: TextStyle(fontSize: 12.0),
+                              labelColor: Theme.of(context).primaryColor,
+                              unselectedLabelColor: Colors.grey[400],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    flexibleSpace: FlexibleSpaceBar(
-                      collapseMode: CollapseMode.parallax,
-                      background: _appBarBackground(),
-                    ),
-                  ),
-                  SliverList(
-                      delegate: SliverChildListDelegate([
-                    // FutureBuilder<MovieDetails>(
-                    //     future: movDetails,
-                    //     builder: (context, snapshot) {
-                    //       if (snapshot.connectionState !=
-                    //           ConnectionState.done) {
-                    //         return Center(
-                    //           child: CircularProgressIndicator(),
-                    //         );
-                    //       } else {
-                    //         if (snapshot.hasData) {
-                    /*return */ Container(
-                      height: MediaQuery.of(context).size.height - 130.0,
-                      child: TabBarView(
-                        children: [
-                          TabDescription(
-                            id: widget.movie,
-                            details: _movDet,
-                          ),
-                          TabTrailers(
-                            getYoutube: _movYt,
-                          ),
-                          TabReview(
-                            movRewiew: _movRev,
-                          ),
-                        ],
-                        controller: tabController,
+                      flexibleSpace: FlexibleSpaceBar(
+                        collapseMode: CollapseMode.parallax,
+                        background: _appBarBackground(),
                       ),
-                    )
-                    //   } else
-                    //     return Text('*-> Ничего нет');
-                    // }
-                    // })
-                  ]))
-                ],
-              );
-            }),
+                    ),
+                    SliverList(
+                        delegate: SliverChildListDelegate([
+                      // FutureBuilder<MovieDetails>(
+                      //     future: movDetails,
+                      //     builder: (context, snapshot) {
+                      //       if (snapshot.connectionState !=
+                      //           ConnectionState.done) {
+                      //         return Center(
+                      //           child: CircularProgressIndicator(),
+                      //         );
+                      //       } else {
+                      //         if (snapshot.hasData) {
+                      /*return */ Container(
+                        height: MediaQuery.of(context).size.height - 130.0,
+                        child: TabBarView(
+                          children: [
+                            TabDescription(
+                              id: widget.movie,
+                              details: _movDet,
+                            ),
+                            TabTrailers(
+                              getYoutube: _movYt,
+                            ),
+                            TabReview(
+                              movRewiew: _movRev,
+                            ),
+                          ],
+                          controller: tabController,
+                        ),
+                      )
+                      //   } else
+                      //     return Text('*-> Ничего нет');
+                      // }
+                      // })
+                    ]))
+                  ],
+                );
+              }),
+      ),
     );
   }
 }
