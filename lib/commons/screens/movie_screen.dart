@@ -12,6 +12,7 @@ import 'package:popular_films/commons/db/hive_data_models.dart';
 import 'package:popular_films/commons/db/sqflite/db_helpers.dart';
 import 'package:popular_films/commons/screens/widgets/custom_snackbar.dart';
 import 'package:provider/provider.dart';
+import 'dart:io' show Platform;
 
 import 'widgets/tab_description.dart';
 import 'widgets/tab_review.dart';
@@ -34,6 +35,11 @@ class MovieScreen extends StatefulWidget {
 class _MovieScreenState extends State<MovieScreen>
     with TickerProviderStateMixin {
   BuildContext scaffoldContext;
+  final GlobalKey _appBarKey = GlobalKey();
+  final GlobalKey _sliderKey = GlobalKey();
+
+  Size appBarSize;
+  Size sliderSize;
 
   List<CachedNetworkImage> _cachedImgs = [];
   final myCacheManager = CacheManager();
@@ -321,7 +327,12 @@ class _MovieScreenState extends State<MovieScreen>
   @override
   void initState() {
     super.initState();
-
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   getSliderSize();
+    //   getAppBarSize();
+    // });
+    //
+    // Future.delayed(Duration(seconds: 1));
     setState(() {
       _isFav = widget.isFav;
     });
@@ -331,6 +342,7 @@ class _MovieScreenState extends State<MovieScreen>
     tabIndex = 0;
     _movie = widget.movie;
     print(widget.movie);
+    // getAppBarSize();
   }
 
   @override
@@ -369,6 +381,20 @@ class _MovieScreenState extends State<MovieScreen>
     await DatabaseHelper.instance.deleteFav(_movDet.id);
     print("delete");
   }
+  //
+  // getSliderSize() {
+  //   RenderBox _sliderBox = _appBarKey.currentContext.findRenderObject();
+  //   setState(() {
+  //     sliderSize = _sliderBox.size;
+  //   });
+  // }
+  //
+  // getAppBarSize() {
+  //   RenderBox _appBarBox = _appBarKey.currentContext.findRenderObject();
+  //   setState(() {
+  //     appBarSize = _appBarBox.size;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -390,9 +416,11 @@ class _MovieScreenState extends State<MovieScreen>
       return Stack(
         overflow: Overflow.visible,
         children: [
-          Column(children: [
+          Column(
+              key: _appBarKey,
+              children: [
             Container(
-              height: 200.0,
+              height: Platform.isIOS ? 211.0 : 200.0,
               color: Theme.of(context).cardColor,
               width: MediaQuery.of(context).size.width,
               child: _cachedImgs.length == 0
@@ -401,6 +429,7 @@ class _MovieScreenState extends State<MovieScreen>
                       itemCount: _cachedImgs.length,
                       carouselController: _carouselController,
                       itemBuilder: (context, index, reason) => Image(
+                        key: _sliderKey,
                         image: CachedNetworkImageProvider(_cachedImgs[index].imageUrl),
                         fit: BoxFit.fill,
                       ),
@@ -423,7 +452,7 @@ class _MovieScreenState extends State<MovieScreen>
           ]),
           Positioned(
             right: 10.0,
-            top: 200.0,
+            top: Platform.isIOS ? 210.0 : 200.0,
             child: Container(
               // color: Colors.white,
               width: MediaQuery.of(context).size.width / 2,
@@ -461,7 +490,7 @@ class _MovieScreenState extends State<MovieScreen>
           ),
           Positioned(
             width: MediaQuery.of(context).size.width,
-            top: 40.0,
+            top: Platform.isIOS ? 20.0 : 40.0,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: _cachedImgs.asMap().entries.map((e) {
@@ -479,7 +508,7 @@ class _MovieScreenState extends State<MovieScreen>
           ),
           Positioned(
               left: 20.0,
-              top: 100.0,
+              top: Platform.isIOS ? 110.0 : 100.0,
               child: Image(
                 image: CachedNetworkImageProvider(_cachedPoster),
                 width: 140.0,
@@ -487,7 +516,7 @@ class _MovieScreenState extends State<MovieScreen>
                 fit: BoxFit.fill,
               )),
           Positioned(
-              top: 170.0,
+              top: Platform.isIOS ? 180.0 : 170.0,
               right: 20.0,
               child: GestureDetector(
                 onTap: () async {
@@ -535,7 +564,7 @@ class _MovieScreenState extends State<MovieScreen>
                 color: Theme.of(context).primaryColor,
                 size: 25.0,
               )),
-          expandedHeight: 290.0,
+          expandedHeight: Platform.isIOS ? 320.0 : 290.0,
         ),
         SliverList(
             delegate: SliverChildListDelegate([
@@ -575,7 +604,7 @@ class _MovieScreenState extends State<MovieScreen>
                         )),
                     pinned: true,
                     floating: false,
-                    expandedHeight: 330.0,
+                    expandedHeight: Platform.isIOS ? 360.0 : 330.0,
                     bottom: PreferredSize(
                       preferredSize: Size.fromHeight(50.0),
                       child: Container(
