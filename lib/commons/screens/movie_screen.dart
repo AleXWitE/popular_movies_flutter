@@ -441,7 +441,8 @@ class _MovieScreenState extends State<MovieScreen>
                 overflow: Overflow.visible,
                 children: [
                   Positioned(
-                    right: 10.0,
+                    // right: 10.0,
+                    right: MediaQuery.of(context).size.width / 40,
                     top:/* Platform.isIOS ? 210.0 : */0.0,
                     child: Container(
                       // color: Colors.white,
@@ -480,7 +481,7 @@ class _MovieScreenState extends State<MovieScreen>
                   ),
                   Positioned(
                     width: MediaQuery.of(context).size.width,
-                    top: /*Platform.isIOS ? 20.0 : */-150.0,
+                    top: -(MediaQuery.of(context).size.height / 5),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: _cachedImgs.asMap().entries.map((e) {
@@ -497,17 +498,23 @@ class _MovieScreenState extends State<MovieScreen>
                     ),
                   ),
                   Positioned(
-                      left: 20.0,
-                      top: /*Platform.isIOS ? 110.0 : */-100.0,
+                      // left: 20.0,
+                    left: MediaQuery.of(context).size.width / 20,
+                      // top: /*Platform.isIOS ? 110.0 : */-100.0,
+                      top: -(MediaQuery.of(context).size.height / 7),
                       child: Image(
                         image: CachedNetworkImageProvider(_cachedPoster),
-                        width: 140.0,
-                        height: 200.0,
+                        // width: 140.0,
+                        width: MediaQuery.of(context).size.width / 2.5,
+                        // height: 200.0,
+                        // height: MediaQuery.of(context).size.height / 4,
                         fit: BoxFit.fill,
                       )),
                   Positioned(
-                      top: /*Platform.isIOS ? 180.0 : */-30.0,
-                      right: 20.0,
+                      // top: /*Platform.isIOS ? 180.0 : */-30.0,
+                      top: -(MediaQuery.of(context).size.height / 30),
+                      // right: 20.0,
+                      right: MediaQuery.of(context).size.width / 20,
                       child: GestureDetector(
                         onTap: () async {
                           setState(() {
