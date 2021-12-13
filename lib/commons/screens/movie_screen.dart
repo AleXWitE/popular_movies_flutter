@@ -415,7 +415,8 @@ class _MovieScreenState extends State<MovieScreen>
                       itemCount: _cachedImgs.length,
                       carouselController: _carouselController,
                       itemBuilder: (context, index, reason) => Image(
-                        height: 200.0,
+                        // height: 200.0,
+                        height: MediaQuery.of(context).size.height / 3,
                         // key: _sliderKey,
                         image: CachedNetworkImageProvider(_cachedImgs[index].imageUrl),
                         fit: BoxFit.fill,
@@ -434,7 +435,8 @@ class _MovieScreenState extends State<MovieScreen>
             ),
             Container(
               color: Theme.of(context).cardColor,
-              height: 125.0,
+              // height: 125.0,
+              height: MediaQuery.of(context).size.height / 6,
               child: Stack(
                 overflow: Overflow.visible,
                 children: [
@@ -600,7 +602,8 @@ class _MovieScreenState extends State<MovieScreen>
                           )),
                       pinned: true,
                       floating: false,
-                      expandedHeight:/* Platform.isIOS ? 360.0 :*/ 370.0,
+                      // expandedHeight:/* Platform.isIOS ? 360.0 :*/ 370.0,
+                      expandedHeight: MediaQuery.of(context).size.height / 2.2,
                       bottom: PreferredSize(
                         preferredSize: Size.fromHeight(50.0),
                         child: Container(
