@@ -501,18 +501,18 @@ class _MovieScreenState extends State<MovieScreen>
                       // left: 20.0,
                     left: MediaQuery.of(context).size.width / 20,
                       // top: /*Platform.isIOS ? 110.0 : */-100.0,
-                      top: -(MediaQuery.of(context).size.height / 7),
+                      top: -(MediaQuery.of(context).size.height / 8),
                       child: Image(
                         image: CachedNetworkImageProvider(_cachedPoster),
                         // width: 140.0,
-                        width: MediaQuery.of(context).size.width / 2.5,
+                        // width: MediaQuery.of(context).size.width / 2.5,
                         // height: 200.0,
-                        // height: MediaQuery.of(context).size.height / 4,
+                        height: MediaQuery.of(context).size.height / 4,
                         fit: BoxFit.fill,
                       )),
                   Positioned(
                       // top: /*Platform.isIOS ? 180.0 : */-30.0,
-                      top: -(MediaQuery.of(context).size.height / 30),
+                      top: -(MediaQuery.of(context).size.height / 26),
                       // right: 20.0,
                       right: MediaQuery.of(context).size.width / 20,
                       child: GestureDetector(
