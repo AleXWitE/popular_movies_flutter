@@ -236,57 +236,60 @@ class TabDescription extends StatelessWidget {
       );
     }
 
-    return Column(
-      children: [
-        SizedBox(height: 20.0,),
-        _row(),
-        Divider(
-          thickness: 1.0,
-          height: 1.0,
-          indent: 10.0,
-          endIndent: 10.0,
-        ),
-        Container(
-          padding: EdgeInsets.all(15.0),
-          child: Text(
-            movDesc,
-            style: TextStyle(
-                color: Theme.of(context).backgroundColor, fontSize: 14.0),
+    return Container(
+      color: Theme.of(context).primaryColor,
+      child: Column(
+        children: [
+          SizedBox(height: 20.0,),
+          _row(),
+          Divider(
+            thickness: 1.0,
+            height: 1.0,
+            indent: 10.0,
+            endIndent: 10.0,
           ),
-        ),
-        Container(
-          width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.symmetric(horizontal: 15.0),
-          child: RichText(
-            text: TextSpan(
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                    fontSize: 14.0),
-                text: "Оригинальный заголовок: ",
-                children: [
-                  _spanText(movTitle),
-                  _spanHeader("Дата релиза: "),
-                  _spanText(_setDateInfo(movRelease)),
-                  _spanHeader("Бюджет: "),
-                  _spanText(movBudget),
-                  _spanHeader("Доход: "),
-                  _spanText(movRevenue),
-                  _spanHeader("Страница: "),
-                  TextSpan(
-                    text: movLink,
-                    style: TextStyle(
-                      decoration:movLink == emptyInfo ? TextDecoration.none : TextDecoration.underline,
-                      color: movLink == emptyInfo ? Colors.grey[700] : Colors.teal[400],
-                      fontWeight: FontWeight.normal,
+          Container(
+            padding: EdgeInsets.all(15.0),
+            child: Text(
+              movDesc,
+              style: TextStyle(
+                  color: Theme.of(context).backgroundColor, fontSize: 14.0),
+            ),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width,
+            padding: EdgeInsets.symmetric(horizontal: 15.0),
+            child: RichText(
+              text: TextSpan(
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[700],
+                      fontSize: 14.0),
+                  text: "Оригинальный заголовок: ",
+                  children: [
+                    _spanText(movTitle),
+                    _spanHeader("Дата релиза: "),
+                    _spanText(_setDateInfo(movRelease)),
+                    _spanHeader("Бюджет: "),
+                    _spanText(movBudget),
+                    _spanHeader("Доход: "),
+                    _spanText(movRevenue),
+                    _spanHeader("Страница: "),
+                    TextSpan(
+                      text: movLink,
+                      style: TextStyle(
+                        decoration:movLink == emptyInfo ? TextDecoration.none : TextDecoration.underline,
+                        color: movLink == emptyInfo ? Colors.grey[700] : Colors.teal[400],
+                        fontWeight: FontWeight.normal,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => _launchUrl(),
                     ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () => _launchUrl(),
-                  ),
-                ]),
+                  ]),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

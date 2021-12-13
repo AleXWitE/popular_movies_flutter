@@ -22,10 +22,13 @@ class _TabTrailersState extends State<TabTrailers> {
 
   @override
   Widget build(BuildContext context) {
-            return ListView.builder(
-                itemCount: _getYt.length,
-                itemBuilder: (context, i) =>
-                    YouTubePlay(yt: _getYt, index: i));
+            return Container(
+              color: Theme.of(context).primaryColor,
+              child: ListView.builder(
+                  itemCount: _getYt.length,
+                  itemBuilder: (context, i) =>
+                      YouTubePlay(yt: _getYt, index: i)),
+            );
 
   }
 }

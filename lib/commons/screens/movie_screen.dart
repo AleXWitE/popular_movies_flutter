@@ -381,20 +381,7 @@ class _MovieScreenState extends State<MovieScreen>
     await DatabaseHelper.instance.deleteFav(_movDet.id);
     print("delete");
   }
-  //
-  // getSliderSize() {
-  //   RenderBox _sliderBox = _appBarKey.currentContext.findRenderObject();
-  //   setState(() {
-  //     sliderSize = _sliderBox.size;
-  //   });
-  // }
-  //
-  // getAppBarSize() {
-  //   RenderBox _appBarBox = _appBarKey.currentContext.findRenderObject();
-  //   setState(() {
-  //     appBarSize = _appBarBox.size;
-  //   });
-  // }
+
 
   @override
   Widget build(BuildContext context) {
@@ -409,7 +396,7 @@ class _MovieScreenState extends State<MovieScreen>
     setState(() => _cachPoster = _cachedPoster);
 
     TabController tabController =
-        TabController(length: _tabItems.length, vsync: this);
+        TabController(initialIndex: tabIndex, length: _tabItems.length, vsync: this);
     // setState(() => tabController.index = tabIndex);
 
     _appBarBackground() {
@@ -585,11 +572,13 @@ class _MovieScreenState extends State<MovieScreen>
       ],
     );
 
-    return SafeArea(
-      child: Scaffold(
-        body: _movDet == null
-            ? _scaffoldStructure
-            : Builder(builder: (BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).cardColor,
+      body: _movDet == null
+          ? SafeArea(bottom: false, child: _scaffoldStructure)
+          : SafeArea(
+        bottom: false,
+            child: Builder(builder: (BuildContext context) {
                 scaffoldContext = context;
                 return CustomScrollView(
                   controller: _scrollController,
@@ -621,10 +610,10 @@ class _MovieScreenState extends State<MovieScreen>
                             child: TabBar(
                               tabs: _tabItems,
                               controller: tabController,
-                              // onTap: (i) => setState((){
-                              //   tabIndex = i;
-                              //   // tabController.index = i;
-                              // }),
+                              onTap: (i) => setState((){
+                                tabIndex = i;
+                                // tabController.index = i;
+                              }),
                               indicatorColor: Colors.teal[500],
                               labelStyle: TextStyle(fontSize: 12.0),
                               labelColor: Theme.of(context).primaryColor,
@@ -676,7 +665,7 @@ class _MovieScreenState extends State<MovieScreen>
                   ],
                 );
               }),
-      ),
+          ),
     );
   }
 }
