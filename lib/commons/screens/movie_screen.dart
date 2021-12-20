@@ -514,7 +514,9 @@ class _MovieScreenState extends State<MovieScreen>
                         // width: 140.0,
                         // width: MediaQuery.of(context).size.width / 2.5,
                         // height: 200.0,
-                        height: MediaQuery.of(context).size.height / 4,
+                        height: MediaQuery.of(context).size.height <= 700
+                            ? MediaQuery.of(context).size.height / 3.7
+                            : MediaQuery.of(context).size.height / 4,
                         fit: BoxFit.fill,
                       )),
                   Positioned(
@@ -617,8 +619,8 @@ class _MovieScreenState extends State<MovieScreen>
                       pinned: true,
                       floating: false,
                       // expandedHeight:/* Platform.isIOS ? 360.0 :*/ 370.0,
-                      expandedHeight: MediaQuery.of(context).size.height <= 600
-                          ? MediaQuery.of(context).size.height / 2
+                      expandedHeight: MediaQuery.of(context).size.height <= 700
+                          ? MediaQuery.of(context).size.height / 1.8
                           : MediaQuery.of(context).size.height / 2.2,
                       bottom: PreferredSize(
                         preferredSize: Size.fromHeight(50.0),
