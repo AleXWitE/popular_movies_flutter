@@ -410,8 +410,8 @@ class _MovieScreenState extends State<MovieScreen>
                 Container(
                 // height: /*Platform.isIOS ? 235.0 : */200.0,
                 color: Theme.of(context).cardColor,
-                height: MediaQuery.of(context).size.height / 3,
-                width: MediaQuery.of(context).size.width,
+                // height: MediaQuery.of(context).size.height / 3,
+                // width: MediaQuery.of(context).size.width,
                 child: _cachedImgs.length == 0
                     ? Container()
                     : CarouselSlider.builder(
