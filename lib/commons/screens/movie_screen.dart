@@ -617,7 +617,9 @@ class _MovieScreenState extends State<MovieScreen>
                       pinned: true,
                       floating: false,
                       // expandedHeight:/* Platform.isIOS ? 360.0 :*/ 370.0,
-                      expandedHeight: MediaQuery.of(context).size.height / 2.2,
+                      expandedHeight: MediaQuery.of(context).size.height <= 600
+                          ? MediaQuery.of(context).size.height / 2
+                          : MediaQuery.of(context).size.height / 2.2,
                       bottom: PreferredSize(
                         preferredSize: Size.fromHeight(50.0),
                         child: Container(
