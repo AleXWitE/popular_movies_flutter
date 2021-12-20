@@ -422,7 +422,7 @@ class _MovieScreenState extends State<MovieScreen>
                           height: MediaQuery.of(context).size.height / 3,
                           // key: _sliderKey,
                           image: CachedNetworkImageProvider(_cachedImgs[index].imageUrl),
-                          fit: BoxFit.fitWidth,
+                          fit: BoxFit.cover,
                         ),
                         options: CarouselOptions(
                             autoPlay: true,
@@ -439,7 +439,7 @@ class _MovieScreenState extends State<MovieScreen>
                 Positioned(
                   width: MediaQuery.of(context).size.width,
                   // top: -(MediaQuery.of(context).size.height / 5),
-                  top: 25.0,
+                  top: 50.0,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: _cachedImgs.asMap().entries.map((e) {
@@ -472,37 +472,34 @@ class _MovieScreenState extends State<MovieScreen>
                       // color: Colors.white,
                       width: MediaQuery.of(context).size.width / 2,
                       height: 125.0,
-                      child: FittedBox(
-                        fit: BoxFit.fitHeight,
-                        child: RichText(
-                          overflow: TextOverflow.fade,
-                          text: TextSpan(
-                              text: "${/*_setDateDesc(*/ _movDet.movRelease /*)*/}\n",
-                              style: TextStyle(color: Colors.grey[500], height: 1.8),
-                              children: [
-                                TextSpan(
-                                  text: _movDet.movOrigTitle.length < 17
-                                      ? "${_movDet.movOrigTitle}\n"
-                                      : "${_movDet.movOrigTitle.substring(0, 15)}...\n",
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16.0, height: 1.2),
-                                ),
-                                TextSpan(
-                                  text: _movDet.movTagline != ''
-                                      ? _movDet.movTagline.length > 27
-                                      ? "${_movDet.movTagline.substring(0, 25)}...\n"
-                                      : "${_movDet.movTagline}...\n"
-                                      : "\n",
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 13.0, height: 1.5),
-                                ),
-                                // TextSpan(text: "\n", style: TextStyle(fontSize: 5.0, height: 2.0)),
-                                TextSpan(
-                                  text: "$_genres",
-                                  style: TextStyle(color: Colors.grey[500], height: 1.15),
-                                )
-                              ]),
-                        ),
+                      child: RichText(
+                        overflow: TextOverflow.fade,
+                        text: TextSpan(
+                            text: "${/*_setDateDesc(*/ _movDet.movRelease /*)*/}\n",
+                            style: TextStyle(color: Colors.grey[500], height: 1.8),
+                            children: [
+                              TextSpan(
+                                text: _movDet.movOrigTitle.length < 17
+                                    ? "${_movDet.movOrigTitle}\n"
+                                    : "${_movDet.movOrigTitle.substring(0, 15)}...\n",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16.0, height: 1.2),
+                              ),
+                              TextSpan(
+                                text: _movDet.movTagline != ''
+                                    ? _movDet.movTagline.length > 27
+                                    ? "${_movDet.movTagline.substring(0, 25)}...\n"
+                                    : "${_movDet.movTagline}...\n"
+                                    : "\n",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 13.0, height: 1.5),
+                              ),
+                              // TextSpan(text: "\n", style: TextStyle(fontSize: 5.0, height: 2.0)),
+                              TextSpan(
+                                text: "$_genres",
+                                style: TextStyle(color: Colors.grey[500], height: 1.15),
+                              )
+                            ]),
                       ),
                     ),
                   ),
