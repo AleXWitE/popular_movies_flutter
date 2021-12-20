@@ -511,9 +511,7 @@ class _MovieScreenState extends State<MovieScreen>
                       top: -(MediaQuery.of(context).size.height / 8),
                       child: Image(
                         image: CachedNetworkImageProvider(_cachedPoster),
-                        // width: 140.0,
-                        // width: MediaQuery.of(context).size.width / 2.5,
-                        // height: 200.0,
+
                         height: MediaQuery.of(context).size.height <= 700
                             ? MediaQuery.of(context).size.height / 3.7
                             : MediaQuery.of(context).size.height / 4,
